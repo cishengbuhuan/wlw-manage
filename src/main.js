@@ -9,7 +9,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import {
 	Dropdown, DropdownMenu, DropdownItem, MessageBox, Message,
 	Col, Row, Table, DatePicker, Input, Pagination, Menu, MenuItem,
-	Loading, TableColumn, Form, FormItem, Button, Tag, Tabs,
+	Loading, TableColumn, Form, FormItem, Button, Tag, Tabs, Radio,
 	TabPane, Notification, Submenu, MenuItemGroup, Select, Option, Upload
 } from 'element-ui';
 
@@ -25,7 +25,7 @@ Vue.use(Col).use(Row).use(Table).use(DatePicker)
 	.use(Loading).use(TableColumn).use(Form).use(FormItem)
 	.use(Button).use(Tag).use(Tabs).use(TabPane).use(Submenu)
 	.use(MenuItemGroup).use(Dropdown).use(DropdownMenu).use(DropdownItem)
-	.use(Select).use(Option).use(Upload)
+	.use(Select).use(Option).use(Upload).use(Radio)
 
 
 Vue.prototype.$msgbox = MessageBox;

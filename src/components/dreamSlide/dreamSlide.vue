@@ -56,6 +56,11 @@
 								titleTwo: '网卡管理',
 								path: '/netWorkCard',
 								index: '2-3'
+							},
+							{
+								titleTwo: '金额管理',
+								path: '/amountManage',
+								index: '2-4'
 							}
 						]
 					},

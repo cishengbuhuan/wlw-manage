@@ -47,7 +47,7 @@
 								<!-- 添加 -->
 								<div class="add">
 									<i class="el-icon-circle-plus-outline"></i>
-									<span>添加</span>
+									<span @click="manageAdd">添加</span>
 								</div>
 								<!-- 编辑 -->
 								<div class="edit">
@@ -91,6 +91,7 @@
 									:data="customerManage.listData"
 									border
 									style="width: 100%">
+								<el-table-column type="selection" width="55" align="center"></el-table-column>
 								<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 								<el-table-column prop="name" label="姓名" align="center"></el-table-column>
 								<el-table-column prop="account" label="账号" align="center"></el-table-column>
@@ -180,6 +181,98 @@
 				</div>
 			</div>
 		</div>
+		<!-- 用户管理的添加用户的遮罩 -->
+		<div class="add-new-customer-modal" @click.self="closeAddNew" v-show="customerManage.isAddNewCustomer">
+			<div class="add-box">
+				<div class="box-header">新增用户</div>
+				<div class="box-body">
+					<div class="form">
+						<!-- 姓名 -->
+						<div class="name form-item">
+							<span>姓名：</span>
+							<el-input
+									clearable
+									placeholder="请输入姓名"
+									v-model="customerManage.form.name">
+							</el-input>
+						</div>
+						<!-- 性别 -->
+						<div class="sex form-item">
+							<span>性别：</span>
+							<el-select clearable v-model="customerManage.form.sexValue" placeholder="请选择用户性别">
+								<el-option
+										v-for="item in customerManage.form.sexOption"
+										:key="item.value"
+										:label="item.sex"
+										:value="item.value">
+								</el-option>
+							</el-select>
+						</div>
+						<!-- 登录名 -->
+						<div class="login-name form-item">
+							<span>登录名：</span>
+							<el-input
+									clearable
+									placeholder="请输入登录名"
+									v-model="customerManage.form.loginName">
+							</el-input>
+						</div>
+						<!-- 登录密码 -->
+						<div class="login-psw form-item">
+							<span>登录密码：</span>
+							<el-input
+									clearable
+									placeholder="请输入登录密码"
+									v-model="customerManage.form.loginPsw">
+							</el-input>
+						</div>
+						<!-- 用户角色 -->
+						<div class="role form-item">
+							<span>用户角色：</span>
+							<el-select clearable v-model="customerManage.form.roleValue" placeholder="请选择用户角色">
+								<el-option
+										v-for="item in customerManage.form.roleOption"
+										:key="item.value"
+										:label="item.role"
+										:value="item.value">
+								</el-option>
+							</el-select>
+						</div>
+						<!-- 生日 -->
+						<div class="birthday form-item">
+							<span>生日：</span>
+							<el-date-picker
+									v-model="customerManage.form.birthday"
+									type="date"
+									placeholder="选择生日">
+							</el-date-picker>
+						</div>
+						<!-- 手机号码 -->
+						<div class="phone form-item">
+							<span>手机号码：</span>
+							<el-input
+									clearable
+									placeholder="请输入手机号码"
+									v-model="customerManage.form.phone">
+							</el-input>
+						</div>
+						<!-- 是否启用 -->
+						<div class="is-enable form-item">
+							<span>是否启用：</span>
+							<div class="radio-group">
+								<el-radio v-model="customerManage.form.isEnable" label="1">是</el-radio>
+								<el-radio v-model="customerManage.form.isEnable" label="0">否</el-radio>
+							</div>
+						</div>
+						<!-- 按钮组 -->
+						<div class="btn-group">
+							<div class="btn-sure">确认</div>
+							<div class="btn-cancel">取消</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -242,7 +335,50 @@
 							phone: '17898672345',
 							isAble: '是'
 						}
-					]
+					],
+					// 添加用户的遮罩
+					isAddNewCustomer: false,
+					// 添加用户的表单
+					form: {
+						name: '',
+						// 性别
+						sexValue: '',
+						sexOption: [
+							{
+								sex: '男',
+								value: '1'
+							},
+							{
+								sex: '女',
+								value: '2'
+							},
+							{
+								sex: '保密',
+								value: '3'
+							}
+						],
+						// 用户角色
+						roleValue: '',
+						roleOption: [
+							{
+								role: '角色1',
+								value: '1'
+							},
+							{
+								role: '角色2',
+								value: '2'
+							},
+							{
+								role: '角色3',
+								value: '3'
+							}
+						],
+						loginName: '',
+						loginPsw: '',
+						birthday: '',
+						phone: '',
+						isEnable: '1'
+					}
 				},
 				// 系统配置
 				systemConfig: {
@@ -417,7 +553,15 @@
 			changeSize(val) {
 				this.pageSize = val;
 			},
-
+			// --------------------- 用户管理的相关方法 ---------------------
+			// 点击添加按钮
+			manageAdd(){
+				this.customerManage.isAddNewCustomer = true
+			},
+			// 点击空白处关闭新增用户的遮罩
+			closeAddNew(){
+				this.customerManage.isAddNewCustomer = !this.customerManage.isAddNewCustomer;
+			}
 		}
 	};
 </script>
@@ -606,7 +750,87 @@
 				}
 			}
 		}
+		/* 用户管理的添加用户的遮罩 */
+		.add-new-customer-modal {
+			width: 100%;
+			height: 100%;
+			position: fixed;
+			left: 0;
+			top: 0;
+			z-index: 999;
+			background-color: rgba(0, 0, 0, 0.2);
+			.add-box {
+				width: 600px;
+				height: 600px;
+				background-color: #fff;
+				border-radius: 5px;
+				position: absolute;
+				transform: translate(-50%, -50%);
+				left: 50%;
+				top: 50%;
+				.box-header {
+					width: 100%;
+					height: 50px;
+					line-height: 50px;
+					background-color: mainBlue;
+					border-top-left-radius: 5px;
+					border-top-right-radius: 5px;
+					font-size: 22px;
+					color: #fff;
+					text-align: center;
+				}
+				.box-body {
+					.form {
+						padding: 0 40px;
+						.form-item {
+							display: flex;
+							margin-top: 15px;
+							span {
+								flex: 1;
+								line-height: 40px;
+							}
+							.el-input, .el-select {
+								flex: 5;
+							}
+						}
+						/* 是否启用 */
+						.is-enable {
+							span {
+								flex: 1;
+							}
+							.radio-group {
+								flex: 5;
+								line-height: 40px;
+							}
+						}
+						/* 按钮组 */
+						.btn-group {
+							display: flex;
+							justify-content: center;
+							margin-top: 30px;
+							/* 确认、取消 */
+							.btn-sure, .btn-cancel {
+								width: 90px;
+								height: 32px;
+								line-height: 32px;
+								border-radius: 5px;
+								cursor: pointer;
+								text-align: center;
+								font-size: 16px;
+							}
+							.btn-sure {
+								background-color: mainBlue;
+								color: #fff;
+								margin-right: 60px;
+							}
+							.btn-cancel {
+								border: 1px solid #bbb;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 </style>
-
 

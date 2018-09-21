@@ -37,8 +37,12 @@
 							<router-link to="/newAdd">
 								<div class="edit-detail">编辑详情</div>
 							</router-link>
-							<div class="network-manage">网卡管理</div>
-							<div class="amount-manage">金额管理</div>
+							<router-link to="/netWorkCard">
+								<div class="network-manage">网卡管理</div>
+							</router-link>
+							<router-link to="amountManage">
+								<div class="amount-manage">金额管理</div>
+							</router-link>
 						</div>
 						<div class="bottom">
 							<div class="btn-enable">启用</div>

@@ -6,6 +6,7 @@ import index from '../pages/index.vue'
 import customerList from '../pages/customerList.vue'
 import newAdd from '../pages/newAdd.vue'
 import netWorkCard from '../pages/netWorkCard.vue'
+import amountManage from '../pages/amountManage.vue'
 import testCard from '../pages/testCard.vue'
 import prepaidCard from '../pages/prepaidCard.vue'
 import flowPool from '../pages/flowPool.vue'
@@ -48,6 +49,11 @@ const router = new Router({
 			path: '/netWorkCard',
 			name: 'netWorkCard',
 			component: netWorkCard
+		},
+		{
+			path: '/amountManage',
+			name: 'amountManage',
+			component: amountManage
 		},
 		{
 			path: '/testCard',

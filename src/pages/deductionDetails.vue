@@ -29,8 +29,17 @@
 						</el-input>
 					</div>
 					<div class="tools-bottom">
-						<!-- 类型 -->
-						<el-select class="select" clearable v-model="valueType" placeholder="请选择类型">
+						<!-- 扣款类型 -->
+						<el-select class="select" clearable v-model="valueType" placeholder="请选择扣款类型">
+							<el-option
+									v-for="item in typeOptions"
+									:key="item.value"
+									:label="item.type"
+									:value="item.value">
+							</el-option>
+						</el-select>
+						<!-- 扣款方式 -->
+						<el-select class="select" clearable v-model="valueType" placeholder="请选择扣款方式">
 							<el-option
 									v-for="item in typeOptions"
 									:key="item.value"
