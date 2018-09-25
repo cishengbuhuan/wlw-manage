@@ -17,16 +17,11 @@
 				<div class="form">
 					<!-- 账号 -->
 					<div class="tel">
-						<input type="tel" v-model="user.account" placeholder="请输入账号" maxlength="11" @change="loadCode">
+						<input type="num" v-model="user.account" placeholder="请输入账号">
 					</div>
 					<!-- 密码 -->
 					<div class="psw">
-						<input type="password" v-model="user.password" placeholder="请输入密码" @change="loadCode">
-					</div>
-					<!-- 图形验证码 -->
-					<div class="img-code" v-show="codeShow">
-						<input type="text" placeholder="请输入图形验证码" v-model="user.code">
-						<img :src="user.imgSrc" alt="验证码" class="img" @click="refreshImg">
+						<input type="password" v-model="user.password" placeholder="请输入密码">
 					</div>
 					<!-- 记住密码和忘记密码 -->
 					<div class="remember-forget">
@@ -80,8 +75,7 @@
 				user: {
 					account: '',
 					password: '',
-					code: '',
-					imgSrc: ''
+					code: ''
 				},
 				bg: {
 					width: '100%',
@@ -94,52 +88,24 @@
 			};
 		},
 		mounted() {
-//          this.loadCode()
 		},
 		methods: {
 			btnLogin() {
-				if (!(/^1(3|4|5|6|7|8|9)\d{9}$/.test(this.user.account))) {
-					this.$message.error('请输入正确的手机号码！');
-				}else{
-					this.$axios({
-						url: '/api/v1/login',
-						method: 'post',
-						params: {
-							userCode: this.user.account,
-							password: this.user.password,
-							code: this.user.code
-						}
-					}).then(res => {
-						let code = res.data.code;
-						if (code == 1) {
-							localStorage.setItem('_token', res.data.data.token);
-							this.$router.push({path: '/index'})
-						} else if (code == 0) {
-							this.$message(res.data.msg);
-//							this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-//						    this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-						    this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-						}
-					})
-				}
-			},
-			// 账号和密码不为空
-			loadCode() {
-				if (this.user.account === '' || this.user.password === '') {
-					return
-				}
-				this.codeShow = true;
-//				this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account
-//				this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account
-				this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account
-			},
-			// 点击刷新验证码
-			refreshImg() {
-				this.user.imgSrc = '';
-				this.$nextTick(() => {
-//					this.user.imgSrc = 'http://www.tangjinqian.cn:8080/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-//					this.user.imgSrc = 'http://192.168.1.14:8090/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
-					this.user.imgSrc = 'http://www.91dream.net/matrix/api/v1/image?userCode=' + this.user.account + '&num=' + Math.random()
+				this.$axios({
+					url: '/admin/account/login',
+					method: 'post',
+					params: {
+						userName: this.user.account,
+						password: this.user.password
+					}
+				}).then(res => {
+					let code = res.data.code;
+					if (code == 1) {
+//						localStorage.setItem('_token', res.data.data.token);
+						this.$router.push({path: '/index'})
+					} else if (code == 0) {
+						this.$message(res.data.msg);
+					}
 				})
 			}
 		}

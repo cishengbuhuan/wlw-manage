@@ -27,7 +27,13 @@
 						</div>
 						<!-- 表格 -->
 						<div class="table">
-
+							<el-table
+									:data="dictionaryKind.tableData"
+									:show-header="dictionaryKind.showHeader"
+									style="width: 100%">
+								<el-table-column type="selection" width="55" align="center"></el-table-column>
+								<el-table-column prop="name" label="名称" align="center"></el-table-column>
+							</el-table>
 						</div>
 					</div>
 					<!-- 字典内容 -->
@@ -211,7 +217,16 @@
 						name: '',
 						code: '',
 						remark: ''
-					}
+					},
+					tableData: [
+						{
+							name: '用户角色'
+						},
+						{
+							name: '运营商代理'
+						}
+					],
+					showHeader: false
 				},
 				// 字典内容
 				dictionaryContent: {
@@ -401,8 +416,7 @@
 						}
 						/* 表格 */
 						.table {
-							padding: 20px;
-							border: 1px solid #ddd;
+							border-top: 1px solid #ebeef5;
 						}
 					}
 					/* 字典内容 */

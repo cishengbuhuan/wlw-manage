@@ -64,6 +64,11 @@
 						<el-table-column prop="way" label="扣款方式" align="center"></el-table-column>
 						<el-table-column prop="type" label="扣款类型" align="center"></el-table-column>
 						<el-table-column prop="status" label="扣款状态" align="center"></el-table-column>
+						<el-table-column label="操作" align="center">
+							<template slot-scope="scope">
+								<span class="more" @click="goDetail(scope.row)">查看详情</span>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -177,6 +182,16 @@
 			changeSize(val) {
 				this.pageSize = val;
 			},
+			// 跳转到详情页
+			goDetail(data) {
+//				let deviceId = data.deviceId
+//				this.$router.push({
+//					path:'/cardDetail',
+//					query:{
+//						deviceId: deviceId
+//					}
+//				})
+			}
 		}
 	};
 </script>
@@ -223,6 +238,12 @@
 				/* 测试卡表格 */
 				.table-box {
 					margin-top: 60px;
+					.cell {
+						.more {
+							cursor: pointer;
+							color: mainBlue;
+						}
+					}
 					.el-pagination {
 						text-align: center;
 						margin-top: 20px;

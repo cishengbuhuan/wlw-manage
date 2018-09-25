@@ -10,13 +10,16 @@ import {
 	Dropdown, DropdownMenu, DropdownItem, MessageBox, Message,
 	Col, Row, Table, DatePicker, Input, Pagination, Menu, MenuItem,
 	Loading, TableColumn, Form, FormItem, Button, Tag, Tabs, Radio,
-	TabPane, Notification, Submenu, MenuItemGroup, Select, Option, Upload
+	TabPane, Notification, Submenu, MenuItemGroup, Select, Option, Upload,
+	CheckboxGroup, Checkbox
 } from 'element-ui';
 
 
-axios.defaults.baseURL = 'http://www.91dream.net/matrix';
-// axios.defaults.baseURL = 'http://192.168.1.14:8090';
+// axios.defaults.baseURL = 'http://www.91dream.net/matrix';
+axios.defaults.baseURL = 'http://192.168.1.14:8090';
 // axios.defaults.baseURL = 'http://www.tangjinqian.cn:8080/matrix';
+axios.defaults.withCredentials=true;
+axios.defaults.crossDomain=true;
 // axios.defaults.baseURL = 'http://47.96.232.174/matrix';
 // axios.defaults.timeout = 10000;
 
@@ -25,7 +28,7 @@ Vue.use(Col).use(Row).use(Table).use(DatePicker)
 	.use(Loading).use(TableColumn).use(Form).use(FormItem)
 	.use(Button).use(Tag).use(Tabs).use(TabPane).use(Submenu)
 	.use(MenuItemGroup).use(Dropdown).use(DropdownMenu).use(DropdownItem)
-	.use(Select).use(Option).use(Upload).use(Radio)
+	.use(Select).use(Option).use(Upload).use(Radio).use(CheckboxGroup).use(Checkbox)
 
 
 Vue.prototype.$msgbox = MessageBox;
@@ -39,12 +42,13 @@ Vue.prototype.$axios = axios;
 Vue.config.productionTip = false
 
 
-axios.interceptors.request.use(config => {
-	config.params = Object.assign({_token: localStorage.getItem('_token')}, config.params)
-	return config
-}, err => {
-	return Promise.reject(err)
-})
+// axios.interceptors.request.use(config => {
+// 	// config.params = Object.assign({_token: localStorage.getItem('_token')}, config.params)
+// 	config.headers = Object.assign(withCredentials, XMLHttpRequest)
+// 	return config
+// }, err => {
+// 	return Promise.reject(err)
+// })
 //
 // axios.interceptors.response.use(function (response) {
 // 	// token 已过期，重定向到登录页面

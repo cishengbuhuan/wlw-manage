@@ -153,13 +153,23 @@
 			};
 		},
 		mounted() {
-			this.getCardTotal();
+			this.getCardInfo();
+			this.getTotal()
 		},
 		methods: {
-			// 获取卡片统计信息
-			getCardTotal() {
+			// 获取卡片总数
+			getTotal(){
 				this.$axios({
-					url: '/api/v2/device/getDeviceStatus',
+					url: '/api/manager/customer/totalCard',
+					method: 'post'
+				}).then(res => {
+					this.company.cardNum  = res.data.data
+				})
+			},
+			// 获取卡片统计信息
+			getCardInfo() {
+				this.$axios({
+					url: '/api/manager/customer/cardStatistics',
 					method: 'post'
 				}).then(res => {
 					let data = res.data.data

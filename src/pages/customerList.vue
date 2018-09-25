@@ -15,10 +15,10 @@
 						<div class="tips online"><i></i><span>在线数</span></div>
 						<div class="num">{{ customerCount.online }}</div>
 					</div>
-					<!-- 停机数 -->
+					<!-- 离线数 -->
 					<div class="info-item">
-						<div class="tips stop"><i></i><span>停机数</span></div>
-						<div class="num">{{ customerCount.stop }}</div>
+						<div class="tips offline"><i></i><span>离线数</span></div>
+						<div class="num">{{ customerCount.offline }}</div>
 					</div>
 					<!-- 欠费数 -->
 					<div class="info-item arrears">
@@ -79,7 +79,6 @@
 					<el-table
 							:data="customerData"
 							border
-							@selection-change="checkItem"
 							@select="selectRows"
 							style="width: 100%">
 						<el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -122,7 +121,7 @@
 				customerCount: {
 					total: 0,
 					online: 0,
-					stop: 0,
+					offline: 0,
 					arrears: 0
 				},
 				// 搜索框的相关值
@@ -132,41 +131,10 @@
 					company: ''
 				},
 				// 客户列表
-				customerData: [
-					{
-//						isSelected: true,
-						sortNum: 1,
-						contactName: '张三',
-						contactTel: 13678906666,
-						password: '1234567wex',
-						email: '1234567@qq.com',
-						companyName: '上海#####有限公司',
-						balance: '1000',
-						salesManager: '李四',
-						salesTel: '1234578944',
-						operate: '查看详情',
-						whetherEnable: '是'
-					},
-					{
-//						isSelected: true,
-						sortNum: 1,
-						contactName: '张三',
-						contactTel: 13678906666,
-						password: '1234567wex',
-						email: '1234567@qq.com',
-						companyName: '上海#####有限公司',
-						balance: '1000',
-						salesManager: '李四',
-						salesTel: '1234578944',
-						operate: '查看详情',
-						whetherEnable: '是'
-					}
-				],
-				// 表格中有选中的项
-				haveSelect: false,
+				customerData: [],
 				// 分页需要的数据
 				totalCount: 0,
-				pageSize: 5,
+				pageSize: 20,
 				pageNo: 1,
 
 				// 表格流量排序
@@ -175,29 +143,67 @@
 			};
 		},
 		mounted() {
-
+			this.getCustomerTotal()
+			this.getUserList()
 		},
 		computed: {},
 		methods: {
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;
+				this.getUserList();
 			},
 			// 改变每页显示的条数
 			changeSize(val) {
 				this.pageSize = val;
-			},
-			checkItem(selection) {
-//				console.log(selection)
-				if (selection.length > 0) {
-					this.haveSelect = true;
-					return
-				}
-				this.haveSelect = false
+				this.getUserList();
 			},
 			selectRows(selection, row) {
 				console.log(selection)
 				console.log(row)
+			},
+			// 获取客户统计的数据
+			getCustomerTotal(){
+				this.$axios({
+					url: '/api/manager/customer/statistics',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					this.customerCount.total = data.customerCount
+					this.customerCount.online = data.onlineCount
+					this.customerCount.offline = data.offlineCount
+					this.customerCount.arrears = data.debetCount
+				})
+			},
+
+			// 获取用户列表
+			getUserList(){
+				this.$axios({
+					url: '/api/manager/customer/list',
+					method: 'post',
+					params: {
+						pageSize: this.pageSize,
+						pageNo: this.pageNo
+					}
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					for(let i=0; i<data.length; i++){
+						this.customerData.push({
+							sortNum: data[i].sortNum,
+							contactName: data[i].userName,
+							contactTel: data[i].phone,
+							password: data[i].password,
+							email: data[i].email,
+							companyName: data[i].companyName,
+							balance: data[i].amount,
+							salesManager: data[i].sortNum,
+							salesTel: data[i].sortNum,
+							operate: data[i].sortNum,
+							whetherEnable: data[i].sortNum
+						})
+					}
+				})
 			}
 		}
 	};
@@ -262,7 +268,7 @@
 								background-color: #72ff4c;
 							}
 						}
-						.stop {
+						.offline {
 							i {
 								background-color: #ff4c59;
 							}
@@ -348,6 +354,10 @@
 				/* 表格 */
 				.list-table {
 					margin-top: 30px;
+					.el-pagination {
+						margin-top: 30px;
+						text-align: center;
+					}
 				}
 			}
 		}

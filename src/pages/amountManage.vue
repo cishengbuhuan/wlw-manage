@@ -294,7 +294,7 @@
 				}
 				recharge.currentAmount = ''
 			},
-			// ----------------账户明细的相关方法----------------
+			// ---------------- 账户明细的相关方法 ----------------
 			toggleAccountNav(i){
 				this.accountDetail.navAccount = i;
 			}

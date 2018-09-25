@@ -34,8 +34,24 @@
 						</div>
 						<!-- 表格 -->
 						<div class="table">
-							2431 <br>
-							242311
+							<el-table
+									:data="menuManage.tableData"
+									border
+									style="width: 100%">
+								<el-table-column prop="sortNum" label="序号" width="80" align="center"></el-table-column>
+								<el-table-column prop="name" label="模块名称" width="200" align="center"></el-table-column>
+								<el-table-column prop="code" label="动作（代码）" align="left">
+									<template slot-scope="scope">
+										<div class="code">
+											<div class="add" @click="menuNewAdd(scope.row)">新增</div>
+											<div class="delete" @click="deleteRow(scope.row)">删除</div>
+											<el-checkbox-group v-model="scope.row.checkedCode" @change="handleCheckedCodeChange">
+												<el-checkbox v-for="(item,index) in scope.row.codeArr" :label="item.name" :key="item.name">{{ item.name }}({{ item.code }})</el-checkbox>
+											</el-checkbox-group>
+										</div>
+									</template>
+								</el-table-column>
+							</el-table>
 						</div>
 					</div>
 					<!-- 用户管理 -->
@@ -114,7 +130,45 @@
 						</div>
 					</div>
 					<!-- 权限配置 -->
-					<div class="permission-config" v-show="navIndex == 2"></div>
+					<div class="permission-config" v-show="navIndex == 2">
+						<!-- 工具栏 -->
+						<div class="tools">
+							<!-- 角色下拉框 -->
+							<el-select clearable v-model="permissionConfig.roleValue" placeholder="请选择角色">
+								<el-option
+										v-for="item in permissionConfig.roleOption"
+										:key="item.value"
+										:label="item.role"
+										:value="item.value">
+								</el-option>
+							</el-select>
+							<!-- 保存按钮 -->
+							<div class="save-permission">
+								<i class="el-icon-circle-plus"></i>保存菜单权限
+							</div>
+						</div>
+						<!-- 表格 -->
+						<div class="table">
+							<el-table
+									:data="permissionConfig.tableData"
+									border
+									style="width: 100%">
+								<el-table-column prop="sortNum" label="序号" width="80" align="center"></el-table-column>
+								<el-table-column prop="name" label="模块名称" width="200" align="center"></el-table-column>
+								<el-table-column prop="code" label="动作（代码）" align="left">
+									<template slot-scope="scope">
+										<div class="code">
+											<div class="add" @click="menuNewAdd(scope.row)">新增</div>
+											<div class="delete" @click="deleteRow(scope.row)">删除</div>
+											<el-checkbox-group v-model="scope.row.checkedCode" @change="handleCheckedCodeChange">
+												<el-checkbox v-for="(item,index) in scope.row.codeArr" :label="item.name" :key="item.name">{{ item.name }}({{ item.code }})</el-checkbox>
+											</el-checkbox-group>
+										</div>
+									</template>
+								</el-table-column>
+							</el-table>
+						</div>
+					</div>
 					<!-- 系统配置 -->
 					<div class="system-config" v-show="navIndex == 3">
 						<!-- 工具栏 -->
@@ -176,6 +230,42 @@
 									@size-change="changeSize"
 									@current-change="changePageNo">
 							</el-pagination>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 菜单管理的添加用户的遮罩 -->
+		<div class="menu-edit-model" @click.self="closeMenuManage" v-show="menuManage.isShow">
+			<div class="edit-box">
+				<div class="box-header"></div>
+				<div class="box-body">
+					<div class="form">
+						<!-- 名称 -->
+						<div class="name form-item">
+							<span>名称：</span>
+							<el-input
+									clearable
+									placeholder="请输入名称"
+									v-model="menuManage.form.name">
+							</el-input>
+						</div>
+						<!-- 代码 -->
+						<div class="code form-item">
+							<span>代码：</span>
+							<el-select clearable v-model="menuManage.form.codeValue" placeholder="请选择动作代码">
+								<el-option
+										v-for="item in menuManage.form.codeOption"
+										:key="item.value"
+										:label="item.code"
+										:value="item.value">
+								</el-option>
+							</el-select>
+						</div>
+						<!-- 按钮组 -->
+						<div class="btn-group">
+							<div class="btn-sure" @click="menuSure">确认</div>
+							<div class="btn-cancel">取消</div>
 						</div>
 					</div>
 				</div>
@@ -281,6 +371,73 @@
 		data() {
 			return {
 				navIndex: 0,
+				// 菜单管理
+				menuManage: {
+					isShow: false,
+					tableData: [
+						{
+							sortNum: '1',
+							name: '字典管理',
+							checkedCode: [],
+							codeArr: [
+								{
+									name: '增加',
+									code: '1'
+								},
+								{
+									name: '编辑',
+									code: '2'
+								}
+							]
+						},
+						{
+							sortNum: '2',
+							name: '字典内容',
+							checkedCode: [],
+							codeArr: [
+								{
+									name: '增加',
+									code: '1'
+								},
+								{
+									name: '编辑',
+									code: '2'
+								},
+								{
+									name: '启用',
+									code: '3'
+								},
+								{
+									name: '禁用',
+									code: '4'
+								}
+							]
+						}
+					],
+					form: {
+						name: '',
+						codeValue: '',
+						codeOption: [
+							{
+								code: '1',
+								value: '1'
+							},
+							{
+								code: '2',
+								value: '2'
+							},
+							{
+								code: '3',
+								value: '3'
+							}
+						]
+					},
+					currentData: [],
+					// 分页需要的数据
+					totalCount: 123,
+					pageSize: 5,
+					pageNo: 1,
+				},
 				// 用户管理
 				customerManage: {
 					// 角色
@@ -378,39 +535,84 @@
 						birthday: '',
 						phone: '',
 						isEnable: '1'
-					}
+					},
+					// 分页需要的数据
+					totalCount: 123,
+					pageSize: 5,
+					pageNo: 1,
+				},
+				// 权限配置
+				permissionConfig: {
+					roleValue: '',
+					roleOption: [
+						{
+							role: '超级管理员',
+							value: '1'
+						},
+						{
+							role: '管理员',
+							value: '2'
+						},
+						{
+							role: '业务员',
+							value: '3'
+						}
+					],
+					tableData: [
+						{
+							sortNum: '1',
+							name: '字典管理',
+							checkedCode: [],
+							codeArr: [
+								{
+									name: '增加',
+									code: '1'
+								},
+								{
+									name: '编辑',
+									code: '2'
+								}
+							]
+						},
+						{
+							sortNum: '2',
+							name: '字典内容',
+							checkedCode: [],
+							codeArr: [
+								{
+									name: '增加',
+									code: '1'
+								},
+								{
+									name: '编辑',
+									code: '2'
+								},
+								{
+									name: '启用',
+									code: '3'
+								},
+								{
+									name: '禁用',
+									code: '4'
+								}
+							]
+						}
+					],
+					// 分页需要的数据
+					totalCount: 123,
+					pageSize: 5,
+					pageNo: 1,
 				},
 				// 系统配置
 				systemConfig: {
 					configKey: '',
 					configValue: '',
 					remark: '',
-					listData: [
-						{
-							serialNum: '1',
-							key: '2wetsdtev5rsd6t',
-							value: '15',
-							remark: '验证码而 such 苏尔坦'
-						},
-						{
-							serialNum: '2',
-							key: '2wetsdtev5rsd6t',
-							value: '15',
-							remark: '验证码而 such 苏尔坦'
-						},
-						{
-							serialNum: '3',
-							key: '2wetsdtev5rsd6t',
-							value: '15',
-							remark: '验证码而 such 苏尔坦'
-						},
-						{
-							serialNum: '4',
-							key: '2wetsdtev5rsd6t',
-							value: '15',
-							remark: '验证码而 such 苏尔坦'
-						}
-					]
+					listData: [],
+					// 分页需要的数据
+					totalCount: 123,
+					pageSize: 5,
+					pageNo: 1,
 				},
 
 				// 申请开票的工具栏搜索
@@ -532,14 +734,10 @@
 						status: '扣款成功'
 					}
 				],
-				// 分页需要的数据
-				totalCount: 123,
-				pageSize: 5,
-				pageNo: 1,
 			};
 		},
 		mounted() {
-
+			this.getSystemCongigList()
 		},
 		methods: {
 			toggleNav(index){
@@ -553,6 +751,44 @@
 			changeSize(val) {
 				this.pageSize = val;
 			},
+			// --------------------- 菜单管理的相关方法 ---------------------
+			// 切换选中代码
+			handleCheckedCodeChange(value){
+				console.log(value)
+			},
+			// 新增
+			menuNewAdd(row){
+				this.menuManage.currentData = row.codeArr;
+				this.menuManage.isShow = true;
+			},
+			// 删除
+			deleteRow(row){
+//				console.log(row)
+				// 当前选中的项
+				let checked = row.checkedCode;
+				// 对当前选中的选项进行便利循环
+				for(let i=0; i<checked.length; i++){
+					row.codeArr = row.codeArr.filter(item=>{
+						return item.name.indexOf(checked[i]) < 0
+					})
+				}
+			},
+			// 点击空白处关闭编辑的遮罩
+			closeMenuManage(){
+				this.menuManage.isShow = false
+			},
+			// 点击确认
+			menuSure(){
+				let name = this.menuManage.form.name;
+				let code = this.menuManage.form.codeValue;
+				this.menuManage.currentData.push({
+					name: name,
+					code: code
+				})
+				this.menuManage.isShow = false
+				console.log(this.menuManage.currentData)
+			},
+
 			// --------------------- 用户管理的相关方法 ---------------------
 			// 点击添加按钮
 			manageAdd(){
@@ -560,7 +796,26 @@
 			},
 			// 点击空白处关闭新增用户的遮罩
 			closeAddNew(){
-				this.customerManage.isAddNewCustomer = !this.customerManage.isAddNewCustomer;
+				this.customerManage.isAddNewCustomer = false
+			},
+
+			// --------------------- 系统配置的相关方法 ---------------------
+			getSystemCongigList(){
+				this.$axios({
+					url: '/admin/sysconfig/list?pageno='+this.systemConfig.pageNo+'&pagesize='+this.systemConfig.pageSize,
+					method: 'get'
+				}).then(res => {
+					let data = res.data.data
+					this.systemConfig.totalCount = data.totalCount
+					for (let i=0; i<data.length; i++){
+						this.systemConfig.listData.push({
+							serialNum: data[i].sysconfigid,
+							key: data[i].syskey,
+							value: data[i].sysvalue,
+							remark: data[i].remark
+						})
+					}
+				})
 			}
 		}
 	};
@@ -637,8 +892,29 @@
 						}
 						/* 表格 */
 						.table {
-							padding: 20px;
-							border: 1px solid #ddd;
+							.cell {
+								.code {
+									display: flex;
+									.add, .delete {
+										width: 48px;
+										height: 24px;
+										line-height: 24px;
+										background-color: #66c1fa;
+										border-radius: 5px;
+										color: #fff;
+										text-align: center;
+										cursor: pointer;
+										font-size: 16px;
+									}
+									.delete {
+										background-color: #ff4c87;
+										margin: 0 40px 0 15px;
+									}
+									.code-item {
+										margin-right: 25px;
+									}
+								}
+							}
 						}
 					}
 					/* 用户管理 */
@@ -705,7 +981,52 @@
 					}
 					/* 权限配置 */
 					.permission-config {
-
+						/* 工具栏 */
+						.tools {
+							display: flex;
+							margin: 30px 0;
+							.save-permission {
+								background-color: mainBlue;
+								height: 40px;
+								line-height: 40px;
+								text-align: center;
+								cursor: pointer;
+								color: #fff;
+								border-radius: 5px;
+								padding: 0 5px;
+								margin-left: 20px;
+								i {
+									color: #82d888;
+									margin-right: 10px;
+								}
+							}
+						}
+						/* 表格 */
+						.table {
+							.cell {
+								.code {
+									display: flex;
+									.add, .delete {
+										width: 48px;
+										height: 24px;
+										line-height: 24px;
+										background-color: #66c1fa;
+										border-radius: 5px;
+										color: #fff;
+										text-align: center;
+										cursor: pointer;
+										font-size: 16px;
+									}
+									.delete {
+										background-color: #ff4c87;
+										margin: 0 40px 0 15px;
+									}
+									.code-item {
+										margin-right: 25px;
+									}
+								}
+							}
+						}
 					}
 					/* 系统配置 */
 					.system-config {
@@ -751,7 +1072,7 @@
 			}
 		}
 		/* 用户管理的添加用户的遮罩 */
-		.add-new-customer-modal {
+		.add-new-customer-modal, .menu-edit-model {
 			width: 100%;
 			height: 100%;
 			position: fixed;
@@ -759,7 +1080,7 @@
 			top: 0;
 			z-index: 999;
 			background-color: rgba(0, 0, 0, 0.2);
-			.add-box {
+			.add-box, .edit-box {
 				width: 600px;
 				height: 600px;
 				background-color: #fff;
@@ -829,6 +1150,10 @@
 						}
 					}
 				}
+			}
+			.edit-box {
+				width: 400px;
+				height: 260px;
 			}
 		}
 	}

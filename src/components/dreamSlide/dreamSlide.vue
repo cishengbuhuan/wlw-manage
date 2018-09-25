@@ -11,13 +11,13 @@
 						<template slot="title">
 							<span>{{ item.title }}</span>
 						</template>
-						<el-menu-item-group v-for="(child,i) in item.menuTwo" :key="i">
+						<el-menu-item-group v-for="(child,i) in item.menuTwo" :key="i" v-if="child.isShow">
 							<el-menu-item :index="child.index" @click="toPath(child)">
 								{{ child.titleTwo }}
 							</el-menu-item>
 						</el-menu-item-group>
 					</el-submenu>
-					<el-menu-item v-else :index="item.index" @click="toPath(item)">
+					<el-menu-item :index="item.index" @click="toPath(item)" v-if="item.isShow && !item.menuTwo">
 						<span>{{ item.title }}</span>
 					</el-menu-item>
 				</template>
@@ -36,7 +36,8 @@
 					{
 						title: '首页',
 						index: '1',
-						path: '/index'
+						path: '/index',
+						isShow: true
 					},
 					{
 						title: '客户管理',
@@ -45,22 +46,26 @@
 							{
 								titleTwo: '客户列表',
 								path: '/customerList',
-								index: '2-1'
+								index: '2-1',
+								isShow: true
 							},
 							{
 								titleTwo: '新增客户',
 								path: '/newAdd',
-								index: '2-2'
+								index: '2-2',
+								isShow: true
 							},
 							{
 								titleTwo: '网卡管理',
 								path: '/netWorkCard',
-								index: '2-3'
+								index: '2-3',
+								isShow: true
 							},
 							{
 								titleTwo: '金额管理',
 								path: '/amountManage',
-								index: '2-4'
+								index: '2-4',
+								isShow: true
 							}
 						]
 					},
@@ -71,12 +76,14 @@
 							{
 								titleTwo: '测试卡',
 								path: '/testCard',
-								index: '3-1'
+								index: '3-1',
+								isShow: true
 							},
 							{
 								titleTwo: '预付充值卡',
 								path: '/prepaidCard',
-								index: '3-2'
+								index: '3-2',
+								isShow: true
 							}
 						]
 					},
@@ -88,19 +95,22 @@
 								titleTwo: '中国移动',
 								path: '/flowPool/1',
 								index: '4-1',
-								type: 1
+								type: 1,
+								isShow: true
 							},
 							{
 								titleTwo: '中国联通',
 								path: '/flowPool/2',
 								index: '4-2',
-								type: 2
+								type: 2,
+								isShow: true
 							},
 							{
 								titleTwo: '中国电信',
 								path: '/flowPool/3',
 								index: '4-3',
-								type: 3
+								type: 3,
+								isShow: true
 							}
 						]
 					},
@@ -111,17 +121,20 @@
 							{
 								titleTwo: '充值明细',
 								path: '/rechargeDetails',
-								index: '5-1'
+								index: '5-1',
+								isShow: true
 							},
 							{
 								titleTwo: '扣款明细',
 								path: '/deductionDetails',
-								index: '5-2'
+								index: '5-2',
+								isShow: true
 							},
 							{
 								titleTwo: '发票管理',
 								path: '/invoiceManagement',
-								index: '5-3'
+								index: '5-3',
+								isShow: true
 							}
 						]
 					},
@@ -132,12 +145,14 @@
 							{
 								titleTwo: '字典管理',
 								path: '/dictionary',
-								index: '6-1'
+								index: '6-1',
+								isShow: true
 							},
 							{
 								titleTwo: '系统管理',
 								path: '/system',
-								index: '6-2'
+								index: '6-2',
+								isShow: true
 							}
 						]
 					}
@@ -145,10 +160,41 @@
 			};
 		},
 		mounted() {
+			this.getMenuList()
 		},
 		methods: {
 			toPath(path) {
 				this.$router.replace(path)
+			},
+			// 获取到菜单列表
+			getMenuList(){
+				this.$axios({
+					url: '/admin/menu/getByAdmin',
+					method: 'post',
+					headers: {
+						"Content-Type":"application/json;charset=utf-8"
+					},
+					withCredentials : true
+				}).then(res => {
+					let data = res.data.data
+
+
+					let result = [];
+					for(let item of data){
+						if(item.parentid === 0 ){
+							if(item.hasChild){
+								item.children = [];
+								for(let v of data ){
+									if(v.parentid === item.menuid){
+										item.children.push(v);
+									}
+								}
+							}
+							result.push(item);
+							continue
+						}
+					}
+				})
 			}
 		}
 	};

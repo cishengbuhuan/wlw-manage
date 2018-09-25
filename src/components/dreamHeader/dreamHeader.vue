@@ -33,7 +33,7 @@
 			};
 		},
 		mounted() {
-			this.getHeaderInfo()
+//			this.getHeaderInfo()
 		},
 		methods: {
 			getHeaderInfo() {
@@ -42,7 +42,6 @@
 					method: 'post'
 				}).then(res => {
 					let data = res.data.data;
-					this.user.headImg = data.avatar ? data.avatar : '../../static/images/default-head.png';
 					this.user.nickname = data.companyName;
 				})
 			},
