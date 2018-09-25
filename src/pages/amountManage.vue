@@ -49,10 +49,9 @@
 										{{ item.num }}
 									</li>
 									<li :class="[{current: platformRecharge.rechargeAmount.customAmount != '自定义金额'}]">
-										<input type="text"
-										       @blur="inputBlur"
-										       @change="inputChange"
-										       @focus="inputFocus"
+										<input type="tel"
+										       @blur="toggleHolder(1)"
+										       @focus="toggleHolder(0)"
 										       v-model="platformRecharge.rechargeAmount.customAmount">
 									</li>
 								</ul>
@@ -119,7 +118,7 @@
 		data() {
 			return {
 				// tab切换的索引
-				navIndex: 2,
+				navIndex: 0,
 				// 平台充值
 				platformRecharge: {
 					// 基本信息
@@ -156,7 +155,8 @@
 						// 自定义金额
 						customAmount: '自定义金额',
 						// 当前选中的金额
-						currentAmount: ''
+						currentAmount: '',
+						holderText: '自定义金额'
 					}
 				},
 				// 线下转账
@@ -264,39 +264,37 @@
 					amount[i].isChecked = false;
 				}
 				amount[index].isChecked = true;
-				this.platformRecharge.rechargeAmount.currentAmount = amount[index].num
+
+				this.platformRecharge.rechargeAmount.customAmount =  '自定义金额'
+				this.platformRecharge.rechargeAmount.currentAmount = parseInt(amount[index].num);
 			},
-			// 点击自定义金额
-			clickCustomAmount(){
-				let recharge = this.platformRecharge.rechargeAmount
-				for(let i=0; i<recharge.amount.length; i++){
-					recharge.amount[i].isChecked = false;
+
+			toggleHolder(state){
+				if(!state){
+					this.platformRecharge.rechargeAmount.customAmount = ''
+					let recharge = this.platformRecharge.rechargeAmount
+					for(let i=0; i<recharge.amount.length; i++){
+						recharge.amount[i].isChecked = false;
+					}
+				}else {
+					if(this.platformRecharge.rechargeAmount.customAmount.parseInt().isNumber){
+						return
+					}else {
+						this.platformRecharge.rechargeAmount.customAmount = '自定义金额'
+					}
 				}
-				recharge.currentAmount = recharge.customAmount
-			},
-			// 自定义金额输入框的聚焦事件
-			inputFocus(){
-				let recharge = this.platformRecharge.rechargeAmount
-				for(let i=0; i<recharge.amount.length; i++){
-					recharge.amount[i].isChecked = false;
-				}
-				recharge.customAmount = ''
-			},
-			inputChange(){
-				let recharge = this.platformRecharge.rechargeAmount
-				recharge.currentAmount = recharge.customAmount
-			},
-			// 自定义金额输入框的失焦事件
-			inputBlur(){
-				let recharge = this.platformRecharge.rechargeAmount
-				if(recharge.customAmount == '') {
-					recharge.customAmount = '自定义金额'
-				}
-				recharge.currentAmount = ''
 			},
 			// ---------------- 账户明细的相关方法 ----------------
 			toggleAccountNav(i){
 				this.accountDetail.navAccount = i;
+			}
+		},
+		watch:{
+			'platformRecharge.rechargeAmount.customAmount'(val){
+//				console.log(this.platformRecharge.rechargeAmount.customAmount)
+				if(val){
+					this.platformRecharge.rechargeAmount.currentAmount = val
+				}
 			}
 		}
 	};
