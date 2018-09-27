@@ -55,18 +55,18 @@
 								index: '2-2',
 								isShow: true
 							},
-							{
-								titleTwo: '网卡管理',
-								path: '/netWorkCard',
-								index: '2-3',
-								isShow: true
-							},
-							{
-								titleTwo: '金额管理',
-								path: '/amountManage',
-								index: '2-4',
-								isShow: true
-							}
+//							{
+//								titleTwo: '网卡管理',
+//								path: '/netWorkCard',
+//								index: '2-3',
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '金额管理',
+//								path: '/amountManage',
+//								index: '2-4',
+//								isShow: true
+//							}
 						]
 					},
 					{

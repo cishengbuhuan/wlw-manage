@@ -181,7 +181,7 @@
 						type: '预扣款',
 						status: '扣款成功',
 						operate: ''
-					},{
+					}, {
 						serialNum: 1,
 						companyName: '上海***信息技术有限公司',
 						companyBank: '--',
@@ -192,7 +192,7 @@
 						type: '预扣款',
 						status: '扣款成功',
 						operate: ''
-					},{
+					}, {
 						serialNum: 1,
 						companyName: '上海***信息技术有限公司',
 						companyBank: '--',
@@ -251,7 +251,7 @@
 
 		},
 		methods: {
-			toggleNav(index){
+			toggleNav(index) {
 				this.navIndex = index;
 			},
 			// 改变当前页数

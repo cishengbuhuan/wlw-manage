@@ -17,7 +17,7 @@
 				<div class="form">
 					<!-- 账号 -->
 					<div class="tel">
-						<input type="num" v-model="user.account" placeholder="请输入账号">
+						<input type="text" v-model="user.account" placeholder="请输入账号">
 					</div>
 					<!-- 密码 -->
 					<div class="psw">

@@ -45,7 +45,7 @@
 									<li v-for="(item,index) in platformRecharge.rechargeAmount.amount"
 									    :class="[{current: item.isChecked}]"
 									    @click="toggleRechargeAmount(index)"
-										:key="index">
+									    :key="index">
 										{{ item.num }}
 									</li>
 									<li :class="[{current: platformRecharge.rechargeAmount.customAmount != '自定义金额'}]">
@@ -70,15 +70,24 @@
 							<el-table-column prop="cardNumber" label="银行卡号" align="center"></el-table-column>
 							<el-table-column prop="time" label="转款时间" align="center"></el-table-column>
 							<el-table-column prop="amount" label="充值金额" width='70' align="center"></el-table-column>
-							<el-table-column prop="operate" label="操作" align="center"></el-table-column>
+							<el-table-column label="操作" align="center">
+								<template slot-scope="scope">
+									<span class="sure" @click="openSure(scope.row)">确认开通</span>
+									<span class="refuse" @click="openSure(scope.row)">拒绝</span>
+								</template>
+							</el-table-column>
 						</el-table>
 					</div>
 					<!-- 账户明细 -->
 					<div class="account-detail" v-show="navIndex == 2">
 						<!-- 账户明细的tab栏切换 -->
 						<div class="nav-account">
-							<div class="nav-item" @click="toggleAccountNav(0)" :class="[{ current: accountDetail.navAccount == 0 }]">充值记录</div>
-							<div class="nav-item" @click="toggleAccountNav(1)" :class="[{ current: accountDetail.navAccount == 1 }]">消费记录</div>
+							<div class="nav-item" @click="toggleAccountNav(0)"
+							     :class="[{ current: accountDetail.navAccount == 0 }]">充值记录
+							</div>
+							<div class="nav-item" @click="toggleAccountNav(1)"
+							     :class="[{ current: accountDetail.navAccount == 1 }]">消费记录
+							</div>
 						</div>
 						<!-- 账户明细的内容 -->
 						<div class="account-content">
@@ -114,11 +123,13 @@
 </template>
 
 <script>
+	import {timestampToTime} from '../api/dataUtil'
+
 	export default {
 		data() {
 			return {
 				// tab切换的索引
-				navIndex: 0,
+				navIndex: 1,
 				// 平台充值
 				platformRecharge: {
 					// 基本信息
@@ -155,144 +166,128 @@
 						// 自定义金额
 						customAmount: '自定义金额',
 						// 当前选中的金额
-						currentAmount: '',
-						holderText: '自定义金额'
+						currentAmount: ''
 					}
 				},
 				// 线下转账
 				offline: {
-					tableData: [
-						{
-							transfer: '张三',
-							bank: '中国建设银行',
-							cardNumber: '65766234563456',
-							time: '2019-09-09',
-							amount: '1000',
-							operate: '确认开通'
-						},
-						{
-							transfer: '张三',
-							bank: '中国建设银行',
-							cardNumber: '65766234563456',
-							time: '2019-09-09',
-							amount: '1000',
-							operate: '确认开通'
-						},
-						{
-							transfer: '张三',
-							bank: '中国建设银行',
-							cardNumber: '65766234563456',
-							time: '2019-09-09',
-							amount: '1000',
-							operate: '确认开通'
-						}
-					]
+					tableData: []
 				},
 				// 账户明细
 				accountDetail: {
 					navAccount: 0,
 					// 充值记录的表格数据
 					recharge: {
-						rechargeRecord: [
-							{
-								amount: '1000',
-								time: '2018-08-01',
-								way: '支付宝'
-							},
-							{
-								amount: '1000',
-								time: '2018-08-01',
-								way: '支付宝'
-							},
-							{
-								amount: '1000',
-								time: '2018-08-01',
-								way: '支付宝'
-							},
-							{
-								amount: '1000',
-								time: '2018-08-01',
-								way: '支付宝'
-							}
-						],
+						rechargeRecord: [],
 					},
 					// 消费记录的表格数据
 					expenses: {
-						expensesRecord: [
-							{
-								type: '卡消费',
-								amount: '1000',
-								time: '2018-09-09',
-								way: '预扣款'
-							},
-							{
-								type: '卡消费',
-								amount: '1000',
-								time: '2018-09-09',
-								way: '预扣款'
-							},
-							{
-								type: '卡消费',
-								amount: '1000',
-								time: '2018-09-09',
-								way: '预扣款'
-							},
-							{
-								type: '卡消费',
-								amount: '1000',
-								time: '2018-09-09',
-								way: '预扣款'
-							}
-						]
+						expensesRecord: []
 					}
 				}
 			};
 		},
 		mounted() {
-
+			this.getOfflineRecord()
+			this.getRechargeRecord()
+			this.getExpensesRecord()
 		},
 		methods: {
 			// 切换头部的tab栏
-			toggleNav(i){
+			toggleNav(i) {
 				this.navIndex = i;
 			},
-			// ----------------平台充值的相关方法----------------
+			// ---------------- 平台充值的相关方法 ----------------
 			// 切换选中的充值金额
-			toggleRechargeAmount(index){
+			toggleRechargeAmount(index) {
 				let amount = this.platformRecharge.rechargeAmount.amount
-				for(let i=0; i<amount.length; i++){
+				for (let i = 0; i < amount.length; i++) {
 					amount[i].isChecked = false;
 				}
 				amount[index].isChecked = true;
 
-				this.platformRecharge.rechargeAmount.customAmount =  '自定义金额'
+				this.platformRecharge.rechargeAmount.customAmount = '自定义金额'
 				this.platformRecharge.rechargeAmount.currentAmount = parseInt(amount[index].num);
 			},
 
-			toggleHolder(state){
-				if(!state){
+			toggleHolder(state) {
+				if (!state) {
 					this.platformRecharge.rechargeAmount.customAmount = ''
-					let recharge = this.platformRecharge.rechargeAmount
-					for(let i=0; i<recharge.amount.length; i++){
-						recharge.amount[i].isChecked = false;
+					for (let i = 0; i < this.platformRecharge.rechargeAmount.amount.length; i++) {
+						this.platformRecharge.rechargeAmount.amount[i].isChecked = false;
 					}
-				}else {
-					if(this.platformRecharge.rechargeAmount.customAmount.parseInt().isNumber){
-						return
-					}else {
-						this.platformRecharge.rechargeAmount.customAmount = '自定义金额'
+				} else {
+					if (this.platformRecharge.rechargeAmount.customAmount == '') {
+						this.platformRecharge.rechargeAmount.customAmount == '自定义金额'
 					}
 				}
 			},
+			// ---------------- 线下转账的相关方法 ----------------
+			// 获取线下转账记录
+			getOfflineRecord() {
+				this.$axios({
+					url: '/api/manager/finance/offline/list',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					for (let i = 0; i < data.length; i++) {
+						this.offline.tableData.push({
+							transfer: data[i].userName,
+							bank: data[i].bankName,
+							cardNumber: data[i].bankNo,
+							time: timestampToTime(data[i].transferTime),
+							amount: data[i].amount,
+							operate: data[i].type,
+						})
+					}
+				})
+			},
 			// ---------------- 账户明细的相关方法 ----------------
-			toggleAccountNav(i){
+			toggleAccountNav(i) {
 				this.accountDetail.navAccount = i;
+			},
+			// 获取充值记录
+			getRechargeRecord() {
+				this.$axios({
+					url: '/api/manager/finance/pay/list',
+					method: 'post',
+					params: {}
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					for (let i = 0; i < data.length; i++) {
+						this.accountDetail.recharge.rechargeRecord.push({
+							amount: data[i].amount,
+							time: timestampToTime(data[i].insertTime),
+							way: data[i].type
+						})
+					}
+				})
+			},
+			// 获取消费记录
+			getExpensesRecord() {
+				this.$axios({
+					url: '/api/manager/finance/account/list',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					for (let i = 0; i < data.length; i++) {
+						this.accountDetail.expenses.expensesRecord.push({
+							type: data[i].type,
+							amount: data[i].amount,
+							time: timestampToTime(data[i].inserTime),
+							way: data[i].type
+						})
+					}
+				})
 			}
 		},
-		watch:{
-			'platformRecharge.rechargeAmount.customAmount'(val){
+		watch: {
+			'platformRecharge.rechargeAmount.customAmount'(val) {
 //				console.log(this.platformRecharge.rechargeAmount.customAmount)
-				if(val){
+				if (val != '自定义金额') {
 					this.platformRecharge.rechargeAmount.currentAmount = val
 				}
 			}
@@ -433,6 +428,17 @@
 					/* 线下转账 */
 					.offline {
 						padding: 20px 0;
+						.cell {
+							.sure {
+								cursor: pointer;
+								color: mainBlue;
+							}
+							.refuse {
+								cursor: pointer;
+								color: #ff4c87;
+								margin-left: 20px;
+							}
+						}
 					}
 					/* 账户明细 */
 					.account-detail {

@@ -312,7 +312,7 @@
 
 		},
 		methods: {
-			toggleNav(index){
+			toggleNav(index) {
 				this.navIndex = index;
 			},
 			// 改变当前页数
@@ -325,20 +325,20 @@
 			},
 			// -------------- 字典类别的相关方法 --------------
 			// 点击添加按钮
-			addDictionaryKind(){
+			addDictionaryKind() {
 				this.dictionaryKind.isAdd = true;
 			},
 			// 点击空白处让盒子消失
-			closeDictionaryKind(){
+			closeDictionaryKind() {
 				this.dictionaryKind.isAdd = false
 			},
 			// -------------- 字典内容的相关方法 --------------
 			// 点击添加按钮
-			addDictionaryContent(){
+			addDictionaryContent() {
 				this.dictionaryContent.isAdd = true;
 			},
 			// 点击空白处让盒子消失
-			closeDictionaryContent(){
+			closeDictionaryContent() {
 				this.dictionaryContent.isAdd = false;
 			}
 		}

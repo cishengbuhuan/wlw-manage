@@ -45,8 +45,12 @@
 										<div class="code">
 											<div class="add" @click="menuNewAdd(scope.row)">新增</div>
 											<div class="delete" @click="deleteRow(scope.row)">删除</div>
-											<el-checkbox-group v-model="scope.row.checkedCode" @change="handleCheckedCodeChange">
-												<el-checkbox v-for="(item,index) in scope.row.codeArr" :label="item.name" :key="item.name">{{ item.name }}({{ item.code }})</el-checkbox>
+											<el-checkbox-group v-model="scope.row.checkedCode"
+											                   @change="handleCheckedCodeChange">
+												<el-checkbox v-for="(item,index) in scope.row.codeArr"
+												             :label="item.name" :key="item.name">{{ item.name
+													}}({{ item.code }})
+												</el-checkbox>
 											</el-checkbox-group>
 										</div>
 									</template>
@@ -61,22 +65,22 @@
 							<!-- 左侧的按钮组 -->
 							<div class="btn-group">
 								<!-- 添加 -->
-								<div class="add">
+								<div class="add" @click="manageAdd">
 									<i class="el-icon-circle-plus-outline"></i>
-									<span @click="manageAdd">添加</span>
+									<span>添加</span>
 								</div>
 								<!-- 编辑 -->
-								<div class="edit">
+								<div class="edit" @click="manageEdit">
 									<i class="el-icon-edit-outline"></i>
 									<span>编辑</span>
 								</div>
 								<!-- 启用 -->
-								<div class="enable">
+								<div class="enable" @click="btnEnable(1)">
 									<i class="el-icon-circle-check"></i>
 									<span>启用</span>
 								</div>
 								<!-- 禁用 -->
-								<div class="disable">
+								<div class="disable" @click="btnEnable(0)">
 									<i class="el-icon-remove"></i>
 									<span>禁用</span>
 								</div>
@@ -84,7 +88,11 @@
 							<!-- 右侧的搜索组 -->
 							<div class="search-group">
 								<!-- 角色 -->
-								<el-select clearable v-model="customerManage.role.valueType" placeholder="请选择角色">
+								<el-select
+										clearable
+										@change="selectList"
+										v-model="customerManage.role.valueType"
+										placeholder="请选择角色">
 									<el-option
 											v-for="item in customerManage.role.roleOptions"
 											:key="item.value"
@@ -95,6 +103,7 @@
 								<!-- 姓名或账号 -->
 								<el-input
 										clearable
+										@change="selectList"
 										class="name-account"
 										placeholder="姓名或账号"
 										v-model="customerManage.nameAccount">
@@ -106,11 +115,14 @@
 							<el-table
 									:data="customerManage.listData"
 									border
+									@select="selectRows"
 									style="width: 100%">
 								<el-table-column type="selection" width="55" align="center"></el-table-column>
 								<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 								<el-table-column prop="name" label="姓名" align="center"></el-table-column>
 								<el-table-column prop="account" label="账号" align="center"></el-table-column>
+								<el-table-column prop="password" label="密码" v-if="false"
+								                 align="center"></el-table-column>
 								<el-table-column prop="sex" label="性别" align="center"></el-table-column>
 								<el-table-column prop="birthday" label="生日" align="center"></el-table-column>
 								<el-table-column prop="role" label="角色" align="center"></el-table-column>
@@ -118,11 +130,11 @@
 								<el-table-column prop="isAble" label="是否启用" align="center"></el-table-column>
 							</el-table>
 							<el-pagination
-									v-if="totalCount > pageSize"
+									v-if="menuManage.totalCount > menuManage.pageSize"
 									layout="total, sizes, prev, pager, next, jumper"
-									:page-size="pageSize"
-									:current-page="pageNo"
-									:total="totalCount"
+									:page-size="menuManage.pageSize"
+									:current-page="menuManage.pageNo"
+									:total="menuManage.totalCount"
 									:page-sizes="[20, 50, 100]"
 									@size-change="changeSize"
 									@current-change="changePageNo">
@@ -160,8 +172,12 @@
 										<div class="code">
 											<div class="add" @click="menuNewAdd(scope.row)">新增</div>
 											<div class="delete" @click="deleteRow(scope.row)">删除</div>
-											<el-checkbox-group v-model="scope.row.checkedCode" @change="handleCheckedCodeChange">
-												<el-checkbox v-for="(item,index) in scope.row.codeArr" :label="item.name" :key="item.name">{{ item.name }}({{ item.code }})</el-checkbox>
+											<el-checkbox-group v-model="scope.row.checkedCode"
+											                   @change="handleCheckedCodeChange">
+												<el-checkbox v-for="(item,index) in scope.row.codeArr"
+												             :label="item.name" :key="item.name">{{ item.name
+													}}({{ item.code }})
+												</el-checkbox>
 											</el-checkbox-group>
 										</div>
 									</template>
@@ -192,18 +208,21 @@
 								<el-input
 										clearable
 										placeholder="配置键"
+										@change="keyChange"
 										v-model="systemConfig.configKey">
 								</el-input>
 								<!-- 配置值 -->
 								<el-input
 										clearable
 										class="config-value"
+										@change="valueChange"
 										placeholder="配置值"
 										v-model="systemConfig.configValue">
 								</el-input>
 								<!-- 备注 -->
 								<el-input
 										clearable
+										@change="remarkChange"
 										placeholder="备注"
 										v-model="systemConfig.remark">
 								</el-input>
@@ -221,11 +240,11 @@
 								<el-table-column prop="remark" label="备注" align="center"></el-table-column>
 							</el-table>
 							<el-pagination
-									v-if="totalCount > pageSize"
+									v-if="systemConfig.totalCount > systemConfig.pageSize"
 									layout="total, sizes, prev, pager, next, jumper"
-									:page-size="pageSize"
-									:current-page="pageNo"
-									:total="totalCount"
+									:page-size="systemConfig.pageSize"
+									:current-page="systemConfig.pageNo"
+									:total="systemConfig.totalCount"
 									:page-sizes="[20, 50, 100]"
 									@size-change="changeSize"
 									@current-change="changePageNo">
@@ -312,6 +331,7 @@
 							<span>登录密码：</span>
 							<el-input
 									clearable
+									type="password"
 									placeholder="请输入登录密码"
 									v-model="customerManage.form.loginPsw">
 							</el-input>
@@ -356,7 +376,8 @@
 						</div>
 						<!-- 按钮组 -->
 						<div class="btn-group">
-							<div class="btn-sure">确认</div>
+							<div class="btn-sure" v-if="customerManage.isAdd" @click="btnAddSave">确认</div>
+							<div class="btn-sure" v-if="!customerManage.isAdd" @click="btnEditSave">确认</div>
 							<div class="btn-cancel">取消</div>
 						</div>
 					</div>
@@ -367,53 +388,16 @@
 </template>
 
 <script>
+	import {format} from '../api/dataUtil'
+
 	export default {
 		data() {
 			return {
-				navIndex: 0,
+				navIndex: 1,
 				// 菜单管理
 				menuManage: {
 					isShow: false,
-					tableData: [
-						{
-							sortNum: '1',
-							name: '字典管理',
-							checkedCode: [],
-							codeArr: [
-								{
-									name: '增加',
-									code: '1'
-								},
-								{
-									name: '编辑',
-									code: '2'
-								}
-							]
-						},
-						{
-							sortNum: '2',
-							name: '字典内容',
-							checkedCode: [],
-							codeArr: [
-								{
-									name: '增加',
-									code: '1'
-								},
-								{
-									name: '编辑',
-									code: '2'
-								},
-								{
-									name: '启用',
-									code: '3'
-								},
-								{
-									name: '禁用',
-									code: '4'
-								}
-							]
-						}
-					],
+					tableData: [],
 					form: {
 						name: '',
 						codeValue: '',
@@ -434,8 +418,8 @@
 					},
 					currentData: [],
 					// 分页需要的数据
-					totalCount: 123,
-					pageSize: 5,
+					totalCount: 0,
+					pageSize: 20,
 					pageNo: 1,
 				},
 				// 用户管理
@@ -443,56 +427,22 @@
 					// 角色
 					role: {
 						valueRole: '',
+						defaultRole: '',
 						roleOptions: [
 							{
-								role: '角色1',
-								value: '1'
-							},
-							{
-								role: '角色2',
+								role: '超级管理员',
 								value: '2'
 							},
 							{
-								role: '角色3',
-								value: '3'
+								role: '平台公司账号',
+								value: '6'
 							}
 						]
 					},
 					// 姓名或账号
 					nameAccount: '',
 					// 用户管理列表
-					listData: [
-						{
-							serialNum: '1',
-							name: '张三',
-							account: 'admin',
-							sex: '男',
-							birthday: '2018-08-08',
-							role: '管理员',
-							phone: '17898672345',
-							isAble: '是'
-						},
-						{
-							serialNum: '2',
-							name: '张三',
-							account: 'admin',
-							sex: '男',
-							birthday: '2018-08-08',
-							role: '管理员',
-							phone: '17898672345',
-							isAble: '是'
-						},
-						{
-							serialNum: '3',
-							name: '张三',
-							account: 'admin',
-							sex: '男',
-							birthday: '2018-08-08',
-							role: '管理员',
-							phone: '17898672345',
-							isAble: '是'
-						}
-					],
+					listData: [],
 					// 添加用户的遮罩
 					isAddNewCustomer: false,
 					// 添加用户的表单
@@ -511,25 +461,12 @@
 							},
 							{
 								sex: '保密',
-								value: '3'
+								value: '0'
 							}
 						],
 						// 用户角色
 						roleValue: '',
-						roleOption: [
-							{
-								role: '角色1',
-								value: '1'
-							},
-							{
-								role: '角色2',
-								value: '2'
-							},
-							{
-								role: '角色3',
-								value: '3'
-							}
-						],
+						roleOption: [],
 						loginName: '',
 						loginPsw: '',
 						birthday: '',
@@ -537,27 +474,17 @@
 						isEnable: '1'
 					},
 					// 分页需要的数据
-					totalCount: 123,
-					pageSize: 5,
+					totalCount: 0,
+					pageSize: 20,
 					pageNo: 1,
+					// 当前选中的数组
+					selectArr: [],
+					isAdd: true
 				},
 				// 权限配置
 				permissionConfig: {
 					roleValue: '',
-					roleOption: [
-						{
-							role: '超级管理员',
-							value: '1'
-						},
-						{
-							role: '管理员',
-							value: '2'
-						},
-						{
-							role: '业务员',
-							value: '3'
-						}
-					],
+					roleOption: [],
 					tableData: [
 						{
 							sortNum: '1',
@@ -599,8 +526,8 @@
 						}
 					],
 					// 分页需要的数据
-					totalCount: 123,
-					pageSize: 5,
+					totalCount: 0,
+					pageSize: 20,
 					pageNo: 1,
 				},
 				// 系统配置
@@ -610,8 +537,8 @@
 					remark: '',
 					listData: [],
 					// 分页需要的数据
-					totalCount: 123,
-					pageSize: 5,
+					totalCount: 0,
+					pageSize: 20,
 					pageNo: 1,
 				},
 
@@ -674,7 +601,7 @@
 						type: '预扣款',
 						status: '扣款成功',
 						operate: ''
-					},{
+					}, {
 						serialNum: 1,
 						companyName: '上海***信息技术有限公司',
 						companyBank: '--',
@@ -685,7 +612,7 @@
 						type: '预扣款',
 						status: '扣款成功',
 						operate: ''
-					},{
+					}, {
 						serialNum: 1,
 						companyName: '上海***信息技术有限公司',
 						companyBank: '--',
@@ -738,9 +665,12 @@
 		},
 		mounted() {
 			this.getSystemCongigList()
+			this.getMenuListData()
+			this.getCustomerManageList()
+			this.getPermissionRoleOptions()
 		},
 		methods: {
-			toggleNav(index){
+			toggleNav(index) {
 				this.navIndex = index;
 			},
 			// 改变当前页数
@@ -752,33 +682,55 @@
 				this.pageSize = val;
 			},
 			// --------------------- 菜单管理的相关方法 ---------------------
+			// 获取菜单管理列表数据
+			getMenuListData() {
+				this.$axios({
+					url: '/admin/menu/allWithFunc',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					for (let i = 0; i < data.length; i++) {
+						this.menuManage.tableData.push({
+							sortNum: i + 1,
+							name: data[i].menuname,
+							checkedCode: [],
+							codeArr: []
+						})
+						for (let j = 0; j < data[i].functions.length; j++) {
+							this.menuManage.tableData[i].codeArr.push({
+								name: data[i].functions[j].name,
+								code: data[i].functions[j].action
+							})
+						}
+					}
+				})
+			},
 			// 切换选中代码
-			handleCheckedCodeChange(value){
+			handleCheckedCodeChange(value) {
 				console.log(value)
 			},
 			// 新增
-			menuNewAdd(row){
+			menuNewAdd(row) {
 				this.menuManage.currentData = row.codeArr;
 				this.menuManage.isShow = true;
 			},
 			// 删除
-			deleteRow(row){
-//				console.log(row)
+			deleteRow(row) {
 				// 当前选中的项
 				let checked = row.checkedCode;
 				// 对当前选中的选项进行便利循环
-				for(let i=0; i<checked.length; i++){
-					row.codeArr = row.codeArr.filter(item=>{
+				for (let i = 0; i < checked.length; i++) {
+					row.codeArr = row.codeArr.filter(item => {
 						return item.name.indexOf(checked[i]) < 0
 					})
 				}
 			},
 			// 点击空白处关闭编辑的遮罩
-			closeMenuManage(){
+			closeMenuManage() {
 				this.menuManage.isShow = false
 			},
 			// 点击确认
-			menuSure(){
+			menuSure() {
 				let name = this.menuManage.form.name;
 				let code = this.menuManage.form.codeValue;
 				this.menuManage.currentData.push({
@@ -791,23 +743,208 @@
 
 			// --------------------- 用户管理的相关方法 ---------------------
 			// 点击添加按钮
-			manageAdd(){
+			manageAdd() {
 				this.customerManage.isAddNewCustomer = true
+				this.customerManage.isAdd = true
+				this.customerManage.form.name = '';
+				this.customerManage.form.sexValue = '';
+				this.customerManage.form.roleValue = '';
+				this.customerManage.form.loginName = '';
+				this.customerManage.form.loginPsw = '';
+				this.customerManage.form.birthday = '';
+				this.customerManage.form.phone = '';
+				this.customerManage.form.isEnable = '';
+				this.customerManage.form.accountId = ''
+				this.getRoleOptions()
+			},
+			// 获取添加弹框的角色下拉框选项
+			getRoleOptions() {
+				this.$axios({
+					url: '/admin/dict/all',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data;
+					this.customerManage.form.roleOption = []
+					for (let i = 0; i < data.length; i++) {
+						if (data[i].dicttype == 'role') {
+							this.customerManage.form.roleOption.push({
+								role: data[i].dictname,
+								value: data[i].dictid
+							})
+						}
+					}
+				})
+			},
+			// 点击添加弹框的保存按钮
+			btnAddSave() {
+				this.$axios({
+					url: '/admin/account/save',
+					method: 'post',
+					params: {
+						realname: this.customerManage.form.name,
+						sex: this.customerManage.form.sexValue,
+						loginname: this.customerManage.form.loginName,
+						password: this.customerManage.form.loginPsw,
+						role: this.customerManage.form.roleValue,
+						birthday: format(new Date(this.customerManage.form.birthday).getTime(), "Y-m-d"),
+						phone: this.customerManage.form.phone,
+						enable: this.customerManage.form.isEnable
+					}
+				}).then(res => {
+					if (res.data.code == 1) {
+						this.$message.success('保存成功！');
+					}
+					this.customerManage.listData = []
+					this.getCustomerManageList()
+					this.customerManage.isAddNewCustomer = false
+				})
+			},
+			// 点击编辑
+			manageEdit() {
+				if (this.customerManage.selectArr.length != 1) {
+					this.$message('只能选择一项，不能多选或漏选！！');
+				} else {
+					this.customerManage.isAddNewCustomer = true;
+					this.customerManage.isAdd = false
+					this.getRoleOptions();
+					this.customerManage.form.name = this.customerManage.selectArr[0].name;
+					this.customerManage.form.sexValue = this.customerManage.selectArr[0].sex;
+					this.customerManage.form.roleValue = this.customerManage.selectArr[0].role;
+					this.customerManage.form.loginName = this.customerManage.selectArr[0].account;
+					this.customerManage.form.loginPsw = this.customerManage.selectArr[0].password;
+					this.customerManage.form.birthday = this.customerManage.selectArr[0].birthday;
+					this.customerManage.form.phone = this.customerManage.selectArr[0].phone;
+					this.customerManage.form.isEnable = this.customerManage.selectArr[0].isAble + '';
+					this.customerManage.form.accountId = this.customerManage.selectArr[0].accountId
+				}
+			},
+			// 点击编辑弹框的保存
+			btnEditSave() {
+				this.$axios({
+					url: '/admin/account/modify',
+					method: 'post',
+					params: {
+						realname: this.customerManage.form.name,
+						sex: this.customerManage.form.sexValue,
+						loginname: this.customerManage.form.loginName,
+						password: this.customerManage.form.loginPsw,
+						role: this.customerManage.form.roleValue,
+						birthday: format(new Date(this.customerManage.form.birthday).getTime(), "Y-m-d"),
+						phone: this.customerManage.form.phone,
+						enable: this.customerManage.form.isEnable,
+						accountid: this.customerManage.form.accountId
+					}
+				}).then(res => {
+					if (res.data.code == 1) {
+						this.$message.success('修改成功！');
+					} else {
+						this.$message.error(res.data.msg);
+					}
+					this.customerManage.listData = []
+					this.getCustomerManageList()
+					this.customerManage.isAddNewCustomer = false
+				})
 			},
 			// 点击空白处关闭新增用户的遮罩
-			closeAddNew(){
+			closeAddNew() {
 				this.customerManage.isAddNewCustomer = false
 			},
+			// 选中某几行
+			selectRows(selection, row) {
+				this.customerManage.selectArr = selection
+			},
+			// 启用或者禁用
+			btnEnable(i) {
+				if (this.customerManage.selectArr.length == 0) {
+					this.$message('请选择至少一项进行操作！');
+				} else {
+					let accountIdStr = ''
+					for (let i = 0; i < this.customerManage.selectArr.length; i++) {
+						accountIdStr += ',' + this.customerManage.selectArr[i].accountId
+					}
+					let accountId = accountIdStr.slice(1, accountIdStr.length)
+
+					this.$axios({
+						url: '/admin/account/enable',
+						method: 'post',
+						params: {
+							ids: accountId,
+							enable: i
+						}
+					}).then(res => {
+						if (res.data.code == 1) {
+							if (i == 1) {
+								this.$message.success('启用成功！');
+							} else {
+								this.$message.success('禁用成功！');
+							}
+						}
+						this.customerManage.listData = []
+						this.getCustomerManageList()
+					})
+				}
+			},
+			// 获取用户管理列表
+			getCustomerManageList() {
+				let role = this.customerManage.role.valueType ? this.customerManage.role.valueType : this.customerManage.role.defaultRole
+				this.$axios({
+					url: 'admin/account/list?pageno=' + this.systemConfig.pageNo + '&pagesize=' + this.systemConfig.pageSize + '&role=' + role + '&key=' + this.customerManage.nameAccount,
+					method: 'get'
+				}).then(res => {
+					let data = res.data.data
+					this.customerManage.totalCount = data.totalCount
+					for (let i = 0; i < data.length; i++) {
+						this.customerManage.listData.push({
+							serialNum: i + 1,
+							name: data[i].realname,
+							account: data[i].loginname,
+							password: data[i].password,
+							sex: data[i].sex == 1 ? '男' : data[i].sex == 2 ? '女' : '保密',
+							birthday: data[i].birthday,
+							role: data[i].role,
+							phone: data[i].phone,
+							isAble: data[i].enable,
+							accountId: data[i].accountid
+						})
+					}
+				})
+			},
+			// 筛选
+			selectList() {
+				this.customerManage.listData = [];
+				this.getCustomerManageList()
+			},
+
+			// --------------------- 权限配置的相关方法 ---------------------
+			// 获取到角色下拉选项
+			getPermissionRoleOptions() {
+				this.$axios({
+					url: '/admin/dict/all',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data;
+					this.customerManage.form.roleOption = []
+					for (let i = 0; i < data.length; i++) {
+						if (data[i].dicttype == 'role') {
+							this.permissionConfig.roleOption.push({
+								role: data[i].dictname,
+								value: data[i].dictid
+							})
+						}
+					}
+				})
+			},
+
 
 			// --------------------- 系统配置的相关方法 ---------------------
-			getSystemCongigList(){
+			getSystemCongigList() {
 				this.$axios({
-					url: '/admin/sysconfig/list?pageno='+this.systemConfig.pageNo+'&pagesize='+this.systemConfig.pageSize,
+					url: '/admin/sysconfig/list?pageno=' + this.systemConfig.pageNo + '&pagesize=' + this.systemConfig.pageSize + '&syskey=' + this.systemConfig.configKey + '&sysvalue=' + this.systemConfig.configValue + '&remark=' + this.systemConfig.remark,
 					method: 'get'
 				}).then(res => {
 					let data = res.data.data
 					this.systemConfig.totalCount = data.totalCount
-					for (let i=0; i<data.length; i++){
+					for (let i = 0; i < data.length; i++) {
 						this.systemConfig.listData.push({
 							serialNum: data[i].sysconfigid,
 							key: data[i].syskey,
@@ -816,6 +953,21 @@
 						})
 					}
 				})
+			},
+			// 查询配置键
+			keyChange() {
+				this.systemConfig.listData = []
+				this.getSystemCongigList()
+			},
+			// 查询配置值
+			valueChange() {
+				this.systemConfig.listData = []
+				this.getSystemCongigList()
+			},
+			// 查询备注
+			remarkChange() {
+				this.systemConfig.listData = []
+				this.getSystemCongigList()
 			}
 		}
 	};

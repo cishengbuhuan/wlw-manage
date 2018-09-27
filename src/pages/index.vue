@@ -158,12 +158,12 @@
 		},
 		methods: {
 			// 获取卡片总数
-			getTotal(){
+			getTotal() {
 				this.$axios({
 					url: '/api/manager/customer/totalCard',
 					method: 'post'
 				}).then(res => {
-					this.company.cardNum  = res.data.data
+					this.company.cardNum = res.data.data
 				})
 			},
 			// 获取卡片统计信息

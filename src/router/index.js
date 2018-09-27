@@ -10,6 +10,7 @@ import amountManage from '../pages/amountManage.vue'
 import testCard from '../pages/testCard.vue'
 import prepaidCard from '../pages/prepaidCard.vue'
 import flowPool from '../pages/flowPool.vue'
+import flowPoolDetail from '../pages/flowPoolDetail.vue'
 import rechargeDetails from '../pages/rechargeDetails.vue'
 import deductionDetails from '../pages/deductionDetails.vue'
 import invoiceManagement from '../pages/invoiceManagement.vue'
@@ -69,6 +70,11 @@ const router = new Router({
 			path: '/flowPool/:type',
 			name: 'flowPool',
 			component: flowPool
+		},
+		{
+			path: '/flowPoolDetail',
+			name: 'flowPoolDetail',
+			component: flowPoolDetail
 		},
 		{
 			path: '/rechargeDetails',

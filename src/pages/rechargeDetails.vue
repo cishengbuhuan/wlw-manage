@@ -140,9 +140,32 @@
 			};
 		},
 		mounted() {
-
+			this.getRechargeDetail()
 		},
 		methods: {
+			// 获取充值明细表格数据
+			getRechargeDetail() {
+				this.$axios({
+					url: '/api/manager/finance/pay/list',
+					method: 'post',
+					params: {}
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					for (let i = 0; i < data.length; i++) {
+						this.detailData.push({
+							serialNum: data[i].no,
+							contactName: data[i].userName,
+							phone: data[i].phone,
+							companyName: data[i].password,
+							amount: data[i].email,
+							time: data[i].companyName,
+							way: data[i].amount,
+							status: data[i].realName
+						})
+					}
+				})
+			},
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;

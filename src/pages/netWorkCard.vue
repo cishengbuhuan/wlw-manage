@@ -39,9 +39,9 @@
 							<div class="new-add" @click="btnAdd">新增单卡</div>
 							<div class="modify-discount" @click="editDiscount">修改折扣</div>
 							<el-upload
-									action="http://localhost:8080/static/files"
-									:on-change="handleChange"
-									:on-remove="handleRemove"
+									action="http://192.168.1.14:8090/api/manager/baseFileImport"
+									ref="upload"
+									:headers="uploadHeaders"
 									:file-list="fileList">
 								<div class="batch-import">批量导入</div>
 							</el-upload>
@@ -532,7 +532,10 @@
 					endTime: '',
 					timeLimit: ''
 				},
-				fileList: []
+				fileList: [],
+				uploadHeaders: {
+					'Content-Type': 'multipart/form-data'
+				}
 			};
 		},
 		mounted() {
@@ -589,31 +592,46 @@
 			},
 
 			// 批量导入
-			handleChange(file, fileList) {
-				this.fileList = fileList;
-				var ids = this.handleUpOrDel(fileList);
-			},
-			handleRemove(file, fileList) {
-				this.fileList = fileList;
-				var ids = this.handleUpOrDel(fileList);
-			},
-			handleUpOrDel(fileList) {
-				let ids = "";
-				if (fileList) {
-					for (var i = 0; i < fileList.length; i++) {
-						console.log(fileList[i].response);
-						var obj = fileList[i].response;
-						if (obj) {
-							if (obj.code) {
-								ids += obj.record.successResponse[0].id;
-								if (i < fileList.length - 1) {
-									ids += ",";
-								}
-							}
-						}
+//			handleChange(file, fileList) {
+//				this.fileList = fileList;
+//				let ids = this.handleUpOrDel(fileList);
+//			},
+//			handleRemove(file, fileList) {
+//				this.fileList = fileList;
+//				let ids = this.handleUpOrDel(fileList);
+//			},
+//			handleUpOrDel(fileList) {
+//				let ids = "";
+//				if (fileList) {
+//					for (let i = 0; i < fileList.length; i++) {
+//						console.log(fileList[i].response);
+//						let obj = fileList[i].response;
+//						if (obj) {
+//							if (obj.code) {
+//								ids += obj.record.successResponse[0].id;
+//								if (i < fileList.length - 1) {
+//									ids += ",";
+//								}
+//							}
+//						}
+//					}
+//				}
+//				return ids;
+//			},
+			uploadSectionFile(param) { //自定义文件上传
+				let fileObj = param.file;
+				console.log(fileObj);
+				this.$axios({
+					url: '/api/manager/baseFileImport',
+					method: 'post',
+					headers: {'Content-Type': 'multipart/form-data'},
+					params: {
+						upfile: fileObj
 					}
-				}
-				return ids;
+				}).then(res => {
+
+				})
+//				this.$refs.upload.submit();
 			}
 		}
 	};

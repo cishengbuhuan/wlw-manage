@@ -54,7 +54,8 @@
 						<el-table-column prop="companyName" label="公司名称" align="center"></el-table-column>
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 						<el-table-column prop="area" label="归属地" align="center"></el-table-column>
-						<el-table-column prop="actualFlow" width="130" label="实际开卡流量(M)(客户订购流量)" align="center"></el-table-column>
+						<el-table-column prop="actualFlow" width="130" label="实际开卡流量(M)(客户订购流量)"
+						                 align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
 						<el-table-column prop="silenceDuration" label="沉默期时长" align="center"></el-table-column>
