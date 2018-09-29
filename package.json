@@ -13,6 +13,7 @@
     "axios": "^0.18.0",
     "echarts": "^4.1.0",
     "element-ui": "^2.4.6",
+    "qs": "^6.5.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
     "v-charts": "^1.17.10",

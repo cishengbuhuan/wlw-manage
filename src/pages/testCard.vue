@@ -6,16 +6,22 @@
 				<!-- 表格工具栏 -->
 				<div class="list-tools">
 					<div class="tools-top">
-						<!-- 搜索iccid -->
+						<!-- 搜索卡号 -->
 						<el-input
 								clearable
 								class="search"
-								placeholder="请输入ICCID"
+								placeholder="请输入卡号"
+								@change="selectTableList"
 								prefix-icon="el-icon-search"
-								v-model="valueIccid">
+								v-model="valueCardNum">
 						</el-input>
 						<!-- 运营商 -->
-						<el-select class="select" clearable v-model="valueOperator" placeholder="请选择运营商">
+						<el-select
+								class="select"
+								clearable
+								@change="selectTableList"
+								v-model="valueOperator"
+								placeholder="请选择运营商">
 							<el-option
 									v-for="item in operatorOptions"
 									:key="item.value"
@@ -24,7 +30,12 @@
 							</el-option>
 						</el-select>
 						<!-- 卡种类 -->
-						<el-select class="select" clearable v-model="valueCardKind" placeholder="请选择卡种类">
+						<el-select
+								class="select"
+								clearable
+								@change="selectTableList"
+								v-model="valueCardKind"
+								placeholder="请选择卡种类">
 							<el-option
 									v-for="item in kindOptions"
 									:key="item.value"
@@ -37,6 +48,7 @@
 								clearable
 								class="search"
 								placeholder="公司名称"
+								@change="selectTableList"
 								prefix-icon="el-icon-search"
 								v-model="valueCompanyName">
 						</el-input>
@@ -58,8 +70,12 @@
 						                 align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
-						<el-table-column prop="silenceDuration" label="沉默期时长" align="center"></el-table-column>
-						<el-table-column prop="operate" label="操作" align="center"></el-table-column>
+						<!--<el-table-column prop="silenceDuration" label="沉默期时长" align="center"></el-table-column>-->
+						<el-table-column label="操作" align="center">
+							<template slot-scope="scope">
+								<div class="more" @click="goDetail(scope.row)">查看详情</div>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -78,11 +94,12 @@
 </template>
 
 <script>
+	import {timestampToTime} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
-				// iccid号
-				valueIccid: '',
+				// 卡号
+				valueCardNum: '',
 				// 运营商的筛选
 				operatorOptions: [
 					{
@@ -107,8 +124,32 @@
 						value: '1'
 					},
 					{
-						kind: '小卡',
+						kind: '双切micro',
 						value: '2'
+					},
+					{
+						kind: '三切nano',
+						value: '3'
+					},
+					{
+						kind: '2*2贴片',
+						value: '4'
+					},
+					{
+						kind: '5*6贴片',
+						value: '5'
+					},
+					{
+						kind: 'eSim',
+						value: '6'
+					},
+					{
+						kind: 'NB',
+						value: '7'
+					},
+					{
+						kind: '其他',
+						value: '8'
 					}
 				],
 				// 卡种类的值
@@ -116,52 +157,15 @@
 				// 公司名称
 				valueCompanyName: '',
 				// 测试卡列表
-				testData: [
-					{
-						serialNum: '1',
-						cardNum: '123',
-						companyName: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						operate: '查看详情'
-					},
-					{
-						serialNum: '1',
-						cardNum: '123',
-						companyName: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						operate: '查看详情'
-					},
-					{
-						serialNum: '1',
-						cardNum: '123',
-						companyName: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						operate: '查看详情'
-					}
-				],
+				testData: [],
 				// 分页需要的数据
-				totalCount: 123,
+				totalCount: 0,
 				pageSize: 5,
-				pageNo: 1,
+				pageNo: 1
 			};
 		},
 		mounted() {
-
+			this.getTestCardList()
 		},
 		methods: {
 			// 改变当前页数
@@ -172,6 +176,54 @@
 			changeSize(val) {
 				this.pageSize = val;
 			},
+			// 获取测试卡列表
+			getTestCardList(){
+				this.$axios({
+					url: '/api/manager/testcard/list',
+					method: 'post',
+					params: {
+						pageSize: this.pageSize,
+						pageNo: this.pageNo,
+						cardNo: this.valueCardNum,
+						netWork: this.valueOperator,
+						cardType: this.valueCardKind,
+						companyName: this.valueCompanyName
+					}
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					console.log(data)
+					for (let i = 0; i < data.length; i++) {
+						this.testData.push({
+							serialNum: data[i].no,
+							cardNum: data[i].cardNumber,
+							companyName: data[i].companyName,
+							operator: data[i].netWork,
+							area: data[i].area,
+							actualFlow: data[i].poolSize,
+							entryTime: timestampToTime(data[i].serveTime),
+							cardKind: data[i].cardType,
+							silenceDuration: data[i].enable,
+							id: data[i].id
+						})
+					}
+				})
+			},
+
+			// 筛选
+			selectTableList(){
+				this.testData = []
+				this.getTestCardList()
+			},
+			goDetail(data){
+				let id = data.id
+				this.$router.push({
+					path: '/testCardDetail',
+					query: {
+						id: id
+					}
+				})
+			}
 		}
 	};
 </script>
@@ -212,6 +264,12 @@
 				/* 测试卡表格 */
 				.table-box {
 					margin-top: 70px;
+					.cell {
+						.more {
+							color: mainBlue;
+							cursor: pointer;
+						}
+					}
 					.el-pagination {
 						text-align: center;
 						margin-top: 20px;

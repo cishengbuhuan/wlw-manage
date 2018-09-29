@@ -37,11 +37,12 @@
 						<!-- 左侧的按钮组 -->
 						<div class="btn-group">
 							<div class="new-add" @click="btnAdd">新增单卡</div>
-							<div class="modify-discount" @click="editDiscount">修改折扣</div>
+							<!--action="http://192.168.1.14:8090/api/manager/baseFileImport"-->
 							<el-upload
-									action="http://192.168.1.14:8090/api/manager/baseFileImport"
+									action="123"
 									ref="upload"
 									:headers="uploadHeaders"
+									:http-request="uploadSectionFile"
 									:file-list="fileList">
 								<div class="batch-import">批量导入</div>
 							</el-upload>
@@ -54,14 +55,15 @@
 									clearable
 									class="search-number"
 									placeholder="请输入卡号"
+									@change="searchData"
 									v-model="cardNum">
 							</el-input>
 							<!-- 搜索开户公司 -->
-							<el-input
-									clearable
-									placeholder="请输入开户公司"
-									v-model="company">
-							</el-input>
+							<!--<el-input-->
+									<!--clearable-->
+									<!--placeholder="请输入开户公司"-->
+									<!--v-model="company">-->
+							<!--</el-input>-->
 						</div>
 					</div>
 					<!-- 表格 -->
@@ -85,7 +87,13 @@
 							<el-table-column prop="packages" label="套餐" align="center"></el-table-column>
 							<el-table-column prop="discount" label="折扣" align="center"></el-table-column>
 							<el-table-column prop="way" label="付款方式" align="center"></el-table-column>
-							<el-table-column prop="operate" label="操作" align="center"></el-table-column>
+							<el-table-column prop="result" label="响应结果" align="center"></el-table-column>
+							<el-table-column label="操作" align="center">
+								<template slot-scope="scope">
+									<div class="more" @click="goDetail(scope.row)">查看详情</div>
+									<div class="edit" @click="editDiscount(scope.row)">修改折扣</div>
+								</template>
+							</el-table-column>
 						</el-table>
 						<el-pagination
 								v-if="totalCount > pageSize"
@@ -102,13 +110,13 @@
 			</div>
 		</div>
 		<!-- 修改折扣的弹出框 -->
-		<div class="modify-discount-modal" @click.self="closeModifyModal" v-show="modifyDiscount">
+		<div class="modify-discount-modal" @click.self="closeModifyModal" v-show="modify.modifyDiscount">
 			<div class="discount-box">
 				<div class="box-header">修改折扣</div>
 				<div class="box-body">
 					<!-- 原折扣 -->
 					<div class="old-discount">
-						原折扣：<span>{{ oldDiscount }}折</span>
+						原折扣：<span>{{ modify.oldDiscount }}折</span>
 					</div>
 					<!-- 设置新折扣 -->
 					<div class="set-new">
@@ -117,7 +125,11 @@
 						<div class="batch">
 							<span>输入批次：</span>
 							<div class="input">
-								<input type="text" v-model="valueBatch">
+								<el-date-picker
+										v-model="modify.valueBatch"
+										type="date"
+										placeholder="请选择批次">
+								</el-date-picker>
 								<div class="tips">
 									<i class="el-icon-warning"></i>
 									<span>注：此处批次为录入时间</span>
@@ -128,7 +140,12 @@
 						<div class="discount">
 							<span>输入折扣：</span>
 							<div class="input">
-								<input type="text" v-model="valueDiscount">
+								<el-input
+										clearable
+										type="number"
+										placeholder="请输入新折扣"
+										v-model="modify.valueDiscount">
+								</el-input>
 								<div class="tips">
 									<i class="el-icon-warning"></i>
 									<span>注：此处为小数点。例：4折=0.4</span>
@@ -174,11 +191,14 @@
 								<div class="label">
 									<span>卡种类<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入ICCID"
-										v-model="singleCardForm.cardKind">
-								</el-input>
+								<el-select clearable v-model="singleCardForm.cardKindValue" placeholder="请选择卡种类">
+									<el-option
+											v-for="item in singleCardForm.cardKindOptions"
+											:key="item.value"
+											:label="item.cardKind"
+											:value="item.value">
+									</el-option>
+								</el-select>
 							</div>
 						</div>
 						<div class="form-row">
@@ -198,22 +218,28 @@
 								<div class="label">
 									<span>运营商<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入运营商"
-										v-model="singleCardForm.operator">
-								</el-input>
+								<el-select clearable v-model="singleCardForm.operatorValue" placeholder="请选择运营商">
+									<el-option
+											v-for="item in singleCardForm.operatorOptions"
+											:key="item.value"
+											:label="item.operator"
+											:value="item.value">
+									</el-option>
+								</el-select>
 							</div>
 							<!-- 套餐 -->
 							<div class="card-kind form-item">
 								<div class="label">
 									<span>套餐<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入套餐"
-										v-model="singleCardForm.packages">
-								</el-input>
+								<el-select clearable v-model="singleCardForm.packagesValue" placeholder="请选择套餐">
+									<el-option
+											v-for="item in singleCardForm.packagesOptions"
+											:key="item.value"
+											:label="item.packages"
+											:value="item.value">
+									</el-option>
+								</el-select>
 							</div>
 						</div>
 						<div class="form-row">
@@ -224,6 +250,7 @@
 								</div>
 								<el-input
 										clearable
+										type="number"
 										placeholder="请输入归入池套餐"
 										v-model="singleCardForm.intoPool">
 								</el-input>
@@ -235,6 +262,7 @@
 								</div>
 								<el-input
 										clearable
+										type="number"
 										placeholder="请输入客户订购流量"
 										v-model="singleCardForm.orderFlow">
 								</el-input>
@@ -244,23 +272,26 @@
 								<div class="label">
 									<span>付费方式<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入付费方式"
-										v-model="singleCardForm.payWay">
-								</el-input>
+								<el-select clearable v-model="singleCardForm.payWayValue" placeholder="请选择付费方式">
+									<el-option
+											v-for="item in singleCardForm.payWayOptions"
+											:key="item.value"
+											:label="item.payWay"
+											:value="item.value">
+									</el-option>
+								</el-select>
 							</div>
 						</div>
 						<div class="form-row">
-							<!-- 归属公司 -->
+							<!-- 归属省份 -->
 							<div class="form-item">
 								<div class="label">
-									<span>归属公司<i>*</i> :</span>
+									<span>归属省份<i>*</i> :</span>
 								</div>
 								<el-input
 										clearable
-										placeholder="请输入归属公司"
-										v-model="singleCardForm.attributionCompany">
+										placeholder="请输入归属省份"
+										v-model="singleCardForm.province">
 								</el-input>
 							</div>
 							<!-- 归属地区 -->
@@ -271,7 +302,7 @@
 								<el-input
 										clearable
 										placeholder="请输入归属地区"
-										v-model="singleCardForm.attributionArea">
+										v-model="singleCardForm.area">
 								</el-input>
 							</div>
 							<!-- 定向IP -->
@@ -292,22 +323,22 @@
 								<div class="label">
 									<span>录入时间<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入录入时间"
-										v-model="singleCardForm.entryTime">
-								</el-input>
+								<el-date-picker
+										v-model="singleCardForm.entryTime"
+										type="date"
+										placeholder="请选择录入时间">
+								</el-date-picker>
 							</div>
 							<!-- 结束时间 -->
 							<div class="form-item">
 								<div class="label">
 									<span>结束时间<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入结束时间"
-										v-model="singleCardForm.endTime">
-								</el-input>
+								<el-date-picker
+										v-model="singleCardForm.endTime"
+										type="date"
+										placeholder="请选择结束时间">
+								</el-date-picker>
 							</div>
 							<!-- 合同签约时限 -->
 							<div class="form-item">
@@ -316,6 +347,7 @@
 								</div>
 								<el-input
 										clearable
+										type="number"
 										placeholder="请输入合同签约时限"
 										v-model="singleCardForm.timeLimit">
 								</el-input>
@@ -327,22 +359,28 @@
 								<div class="label">
 									<span>是否定向卡<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入录入时间"
-										v-model="singleCardForm.entryTime">
-								</el-input>
+								<el-select clearable v-model="singleCardForm.directValue" placeholder="请选择是否定向卡">
+									<el-option
+											v-for="item in singleCardForm.directOptions"
+											:key="item.value"
+											:label="item.direct"
+											:value="item.value">
+									</el-option>
+								</el-select>
 							</div>
 							<!-- 卡片等级 -->
 							<div class="form-item">
 								<div class="label">
 									<span>卡片等级<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入结束时间"
-										v-model="singleCardForm.endTime">
-								</el-input>
+								<el-select clearable v-model="singleCardForm.cardLevelValue" placeholder="请选择卡片等级">
+									<el-option
+											v-for="item in singleCardForm.cardLevelOptions"
+											:key="item.value"
+											:label="item.cardLevel"
+											:value="item.value">
+									</el-option>
+								</el-select>
 							</div>
 							<!-- 沉默期时长 -->
 							<div class="form-item">
@@ -351,8 +389,8 @@
 								</div>
 								<el-input
 										clearable
-										placeholder="请输入合同签约时限"
-										v-model="singleCardForm.timeLimit">
+										placeholder="请输入沉默期时长"
+										v-model="singleCardForm.silenceDuration">
 								</el-input>
 							</div>
 						</div>
@@ -364,8 +402,8 @@
 								</div>
 								<el-input
 										clearable
-										placeholder="请输入录入时间"
-										v-model="singleCardForm.entryTime">
+										placeholder="请输入短信条数"
+										v-model="singleCardForm.message">
 								</el-input>
 							</div>
 							<!-- 行业卡 -->
@@ -373,22 +411,25 @@
 								<div class="label">
 									<span>行业卡<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入结束时间"
-										v-model="singleCardForm.endTime">
-								</el-input>
+								<el-select clearable v-model="singleCardForm.industryCardValue" placeholder="请选择行业卡类别">
+									<el-option
+											v-for="item in singleCardForm.industryCardOptions"
+											:key="item.value"
+											:label="item.industryCard"
+											:value="item.value">
+									</el-option>
+								</el-select>
 							</div>
 							<!-- 计费时间 -->
 							<div class="form-item">
 								<div class="label">
 									<span>计费时间<i>*</i> :</span>
 								</div>
-								<el-input
-										clearable
-										placeholder="请输入合同签约时限"
-										v-model="singleCardForm.timeLimit">
-								</el-input>
+								<el-date-picker
+										v-model="singleCardForm.billingTime"
+										type="date"
+										placeholder="请选择计费时间">
+								</el-date-picker>
 							</div>
 						</div>
 						<div class="form-row">
@@ -399,8 +440,9 @@
 								</div>
 								<el-input
 										clearable
-										placeholder="请输入录入时间"
-										v-model="singleCardForm.entryTime">
+										type="number"
+										placeholder="请输入折扣"
+										v-model="singleCardForm.discount">
 								</el-input>
 							</div>
 						</div>
@@ -413,6 +455,10 @@
 </template>
 
 <script>
+	import {format,timestampToTime,returnPackages,
+		returnOperator,returnCardKind,
+		returnPayWay} from '../api/dataUtil'
+	import qs from 'qs'
 	export default {
 		data() {
 			return {
@@ -425,123 +471,223 @@
 				operatorData: [
 					{
 						operator: '中国移动',
-						isSelected: true
+						isSelected: true,
+						value: 1
 					},
 					{
 						operator: '中国电信',
-						isSelected: false
+						isSelected: false,
+						value: 2
 					},
 					{
 						operator: '中国联通',
-						isSelected: false
+						isSelected: false,
+						value: 3
 					}
 				],
+				netWork: '',
+				defaultNetWork: '1',
 				// 流量池
-				flowPoolData: [
-					{
-						packages: '10M流量池',
-						isSelected: true
-					},
-					{
-						packages: '30M流量池',
-						isSelected: false
-					},
-					{
-						packages: '50M流量池',
-						isSelected: false
-					}
-				],
+				flowPoolData: [],
 
 				// 网卡列表
-				netWorkData: [
-					{
-						serialNum: '1',
-						cardNum: '123',
-						company: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						flowPackages: '30M',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						packages: '全年',
-						discount: '0.4',
-						way: '年付',
-						operate: '查看详情'
-					},
-					{
-						serialNum: '1',
-						cardNum: '123',
-						company: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						flowPackages: '30M',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						packages: '全年',
-						discount: '0.4',
-						way: '年付',
-						operate: '查看详情'
-					},
-					{
-						serialNum: '1',
-						cardNum: '123',
-						company: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						flowPackages: '30M',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						packages: '全年',
-						discount: '0.4',
-						way: '年付',
-						operate: '查看详情'
-					}
-				],
+				netWorkData: [],
 				// 分页需要的数据
-				totalCount: 123,
-				pageSize: 5,
+				totalCount: 0,
+				pageSize: 20,
 				pageNo: 1,
 				// 修改折扣的弹框
-				modifyDiscount: false,
-				oldDiscount: '4',
-				valueBatch: '',
-				valueDiscount: '',
+				modify: {
+					modifyDiscount: false,
+					oldDiscount: '',
+					valueBatch: '',
+					valueDiscount: '',
+				},
 				// 新增单卡的弹框
 				singleCard: false,
 				// 新增单卡弹框的表单
 				singleCardForm: {
 					cardNum: '',
 					iccid: '',
-					cardKind: '',
+
+					// 卡种类
+					cardKindValue: '',
+					cardKindOptions: [
+						{
+							cardKind: '大卡',
+							value: '1'
+						},
+						{
+							cardKind: '双切',
+							value: '2'
+						},
+						{
+							cardKind: '三切',
+							value: '3'
+						},
+						{
+							cardKind: '2*2贴片',
+							value: '4'
+						},
+						{
+							cardKind: '5*6贴片',
+							value: '5'
+						},
+						{
+							cardKind: 'eSim',
+							value: '6'
+						},
+						{
+							cardKind: 'NB',
+							value: '7'
+						},
+						{
+							cardKind: '其他',
+							value: '8'
+						},
+					],
+
+					// 运营商
+					operatorValue: '',
+					operatorOptions: [
+						{
+							operator: '中国移动',
+							value: '1'
+						},
+						{
+							operator: '中国联通',
+							value: '2'
+						},
+						{
+							operator: '中国电信',
+							value: '3'
+						}
+					],
+					// 套餐
+					packagesValue: '',
+					packagesOptions: [
+						{
+							packages: '月',
+							value: '1'
+						},
+						{
+							packages: '半年',
+							value: '2'
+						},
+						{
+							packages: '季度',
+							value: '3'
+						},
+						{
+							packages: '年',
+							value: '4'
+						}
+					],
+					// 付费方式
+					payWayValue: '',
+					payWayOptions: [
+						{
+							payWay: '年付',
+							value: '1'
+						},
+						{
+							payWay: '半年付',
+							value: '2'
+						},
+						{
+							payWay: '季付',
+							value: '3'
+						},
+						{
+							payWay: '月付',
+							value: '4'
+						},
+						{
+							payWay: '后付',
+							value: '5'
+						}
+					],
+					// 是否定向卡
+					directValue: '',
+					directOptions: [
+						{
+							direct: '是',
+							value: '1'
+						},
+						{
+							direct: '否',
+							value: '0'
+						}
+					],
+					// 卡片等级
+					cardLevelValue: '',
+					cardLevelOptions: [
+						{
+							cardLevel: '消费级',
+							value: '1'
+						},
+						{
+							cardLevel: '工业级',
+							value: '2'
+						},
+						{
+							cardLevel: '车规级',
+							value: '3'
+						}
+					],
+					// 行业卡
+					industryCardValue: '',
+					industryCardOptions: [
+						{
+							industryCard: '普通卡',
+							value: '1'
+						},
+						{
+							industryCard: '车联卡',
+							value: '2'
+						},
+						{
+							industryCard: 'NB',
+							value: '3'
+						},
+						{
+							industryCard: '预付充值卡',
+							value: '4'
+						}
+					],
+
 					openCompany: '',
-					operator: '',
-					packages: '',
 					intoPool: '',
 					orderFlow: '',
-					payWay: '',
-					attributionCompany: '',
-					attributionArea: '',
+					province: '',
+					area: '',
 					directedIP: '',
 					entryTime: '',
 					endTime: '',
-					timeLimit: ''
+					timeLimit: '',
+					silenceDuration: '',
+					message: '',
+					billingTime: '',
+					discount: ''
 				},
 				fileList: [],
 				uploadHeaders: {
 					'Content-Type': 'multipart/form-data'
-				}
+				},
+				companyId: '',
+				poolId: '',
+				defaultPoolId: ''
 			};
 		},
 		mounted() {
-
+			this.getCompanyId()
+			this.getPoolPackages()
 		},
 		methods: {
+			// 接收传递过来的companyId
+			getCompanyId(){
+				this.companyId = this.$route.query.companyId
+			},
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;
@@ -556,6 +702,8 @@
 					this.operatorData[i].isSelected = false;
 				}
 				this.operatorData[index].isSelected = true
+				this.netWork = this.operatorData[index].value
+				this.getNetWorkData()
 			},
 			// 切换流量池套餐的分类
 			toggleFlow(index) {
@@ -563,6 +711,8 @@
 					this.flowPoolData[i].isSelected = false;
 				}
 				this.flowPoolData[index].isSelected = true
+				this.poolId = this.flowPoolData[index].poolId
+				this.getNetWorkData()
 			},
 			// 点击新增单卡按钮
 			btnAdd() {
@@ -570,7 +720,56 @@
 			},
 			// 点击新增单卡弹框的保存按钮
 			saveForm() {
-				this.singleCard = false
+				this.$axios({
+					url: '/api/manager/modifyCard',
+					method: 'post',
+					params: {
+						cardNumber: this.singleCardForm.cardNum,
+						iccid: this.singleCardForm.iccid,
+						cardType: this.singleCardForm.cardKindValue,
+
+
+						companyName: this.singleCardForm.openCompany,
+						netWork: this.singleCardForm.operatorValue,
+						packages: this.singleCardForm.packagesValue,
+
+
+						userPoolSize: this.singleCardForm.intoPool,
+						poolSize: this.singleCardForm.orderFlow,
+						payment: this.singleCardForm.payWayValue,
+
+
+						province: this.singleCardForm.province,
+						area: this.singleCardForm.area,
+						cardDirectIp: this.singleCardForm.directedIP,
+
+
+						serveTime: format(new Date(this.singleCardForm.entryTime).getTime(), "Y-m-d"),
+						endTime: format(new Date(this.singleCardForm.endTime).getTime(), "Y-m-d"),
+						contractTerm: this.singleCardForm.timeLimit,
+
+						cardDirect: this.singleCardForm.directValue,
+						cardLevel: this.singleCardForm.cardLevelValue,
+						silentPeriod: this.singleCardForm.silenceDuration,
+
+						msgNo: this.singleCardForm.message,
+						businessCard: this.singleCardForm.industryCardValue,
+						chargeTime: format(new Date(this.singleCardForm.billingTime).getTime(), "Y-m-d"),
+
+
+
+						discount: this.singleCardForm.discount
+					}
+				}).then(res => {
+					if(res.data.code == 1){
+						this.$message.success('保存成功！');
+						this.netWorkData = []
+						this.getNetWorkData()
+					}else {
+						this.$message.error(res.data.msg);
+					}
+					this.singleCard = false
+				})
 			},
 			// 点击空白处让新增单卡的弹框消失
 			closeNewADD() {
@@ -579,16 +778,123 @@
 
 
 			// 点击修改折扣按钮
-			editDiscount() {
-				this.modifyDiscount = true
+			editDiscount(data) {
+				console.log(data)
+				this.modify.modifyDiscount = true
+				this.modify.oldDiscount = data.discount * 10;
+
+				this.modify.deviceId = data.deviceId
+//				this.modify.insertTime = format(new Date(this.modify.valueBatch).getTime(), "Y-m-d")
+				this.modify.netWork = data.netWork
+				this.modify.companyId = data.companyId
+
+				this.modify.valueBatch = data.entryTime
 			},
 			// 修改折扣弹框的保存按钮
 			save() {
-				this.modifyDiscount = false
+				this.modify.modifyDiscount = false
+				this.$axios({
+					url: '/api/manager/modify/discount',
+					method: 'post',
+					params: {
+						deviceId: this.modify.deviceId,
+						discount: this.modify.valueDiscount,
+						insertTime: format(new Date(this.modify.valueBatch).getTime(), "Y-m-d"),
+						companyId: this.modify.companyId,
+						netWork: this.modify.netWork,
+					}
+				}).then(res => {
+					if(res.data.code == 1){
+						this.$message.success(res.data.data);
+						this.netWorkData = []
+						this.getNetWorkData()
+					}else {
+						this.$message.error(res.data.msg);
+					}
+				})
 			},
 			// 点击空白处让修改折扣的弹框消失
 			closeModifyModal() {
-				this.modifyDiscount = !this.modifyDiscount
+				this.modify.modifyDiscount = false
+			},
+
+			// 获取流量池套餐
+			getPoolPackages(){
+				this.$axios({
+					url: '/api/manager/customer/companyPool',
+					method: 'post',
+					params: {
+						companyId: this.companyId,
+						netWork: this.netWork ? this.netWork : this.defaultNetWork,
+					}
+				}).then(res => {
+					let data = res.data.data
+					for (let i = 0; i < data.length; i++) {
+						this.flowPoolData.push({
+							packages: data[i].name,
+							poolId: data[i].poolId,
+							isSelected: false
+						})
+					}
+					this.flowPoolData[0].isSelected = true
+					this.defaultPoolId = this.flowPoolData[0].poolId
+
+					this.getNetWorkData()
+				})
+			},
+			// 获取网卡表格数据
+			getNetWorkData(){
+				this.$axios({
+					url: '/api/manager/card/list',
+					method: 'post',
+					params: {
+						pageSize: this.pageSize,
+						pageNo: this.pageNo,
+						companyId: this.companyId,
+						netWork: this.netWork ? this.netWork : this.defaultNetWork,
+						poolId: this.poolId ? this.poolId : this.defaultPoolId,
+						cardNo: this.cardNum
+					}
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					for (let i = 0; i < data.length; i++) {
+						this.netWorkData.push({
+							serialNum: data[i].no,
+							cardNum: data[i].cardNumber,
+							companyName: data[i].companyName,
+							operator: returnOperator(data[i].netWork),
+							area: data[i].area,
+							flowPackages: data[i].userPoolSize,
+							actualFlow: data[i].poolSize,
+							entryTime: timestampToTime(data[i].serveTime),
+							cardKind: returnCardKind(data[i].cardType),
+							silenceDuration: data[i].silentPeriod,
+							packages: returnPackages(data[i].packageType),
+							discount: data[i].discount,
+							way: returnPayWay(data[i].payment),
+							result: data[i].netResult,
+							deviceId: data[i].deviceId,
+							companyId: data[i].companyId,
+							netWork: data[i].netWork,
+						})
+					}
+				})
+			},
+			// 查看详情
+			goDetail(data){
+				let deviceId = data.deviceId
+				this.$router.push({
+					path: '/cardDetail',
+					query: {
+						deviceId: deviceId
+					}
+				})
+			},
+			// 筛选卡号
+			searchData(){
+				this.netWorkData = []
+				this.getNetWorkData()
 			},
 
 			// 批量导入
@@ -618,20 +924,24 @@
 //				}
 //				return ids;
 //			},
-			uploadSectionFile(param) { //自定义文件上传
-				let fileObj = param.file;
-				console.log(fileObj);
-				this.$axios({
-					url: '/api/manager/baseFileImport',
-					method: 'post',
-					headers: {'Content-Type': 'multipart/form-data'},
-					params: {
-						upfile: fileObj
-					}
-				}).then(res => {
+			// 自定义文件上传
+			uploadSectionFile(params) {
+				//创建 formData 对象
+				let formData = new FormData();
+				// 向 formData 对象中添加文件
+				formData.append('file',params.file);
+				console.log(formData)
 
-				})
-//				this.$refs.upload.submit();
+				let xhr = new XMLHttpRequest();
+				xhr.open('post', 'http://192.168.1.14:8090/api/manager/baseFileImport');
+//				xhr.open('post', 'http://192.168.1.14:8090/admin/device/importOder');
+				xhr.setRequestHeader('content-type','multipart/form-data;')
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState == 4 && xhr.status == 200) {
+						let data = JSON.parse(xhr.responseText);
+					}
+				};
+				xhr.send(formData);
 			}
 		}
 	};
@@ -722,6 +1032,12 @@
 					}
 					/* table */
 					.table {
+						.cell {
+							.more, .edit {
+								cursor: pointer;
+								color: mainBlue;
+							}
+						}
 						.el-pagination {
 							margin-top: 20px;
 							text-align: center;
@@ -788,6 +1104,7 @@
 								font-size: 16px;
 								color: #666;
 								flex: 3;
+								margin-top: 10px;
 							}
 							.input {
 								flex: 7;
@@ -873,7 +1190,7 @@
 										}
 									}
 								}
-								.el-input {
+								.el-input, .el-select {
 									width: 250px;
 									margin-left: 20px;
 								}

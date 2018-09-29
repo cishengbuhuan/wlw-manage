@@ -8,6 +8,8 @@ import newAdd from '../pages/newAdd.vue'
 import netWorkCard from '../pages/netWorkCard.vue'
 import amountManage from '../pages/amountManage.vue'
 import testCard from '../pages/testCard.vue'
+import testCardDetail from '../pages/testCardDetail.vue'
+import cardDetail from '../pages/cardDetail.vue'
 import prepaidCard from '../pages/prepaidCard.vue'
 import flowPool from '../pages/flowPool.vue'
 import flowPoolDetail from '../pages/flowPoolDetail.vue'
@@ -60,6 +62,16 @@ const router = new Router({
 			path: '/testCard',
 			name: 'testCard',
 			component: testCard
+		},
+		{
+			path: '/testCardDetail',
+			name: 'testCardDetail',
+			component: testCardDetail
+		},
+		{
+			path: '/cardDetail',
+			name: 'cardDetail',
+			component: cardDetail
 		},
 		{
 			path: '/prepaidCard',

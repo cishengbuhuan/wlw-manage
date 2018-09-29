@@ -34,18 +34,19 @@
 					<!-- 左侧的按钮组 -->
 					<div class="btn-group">
 						<div class="top">
-							<div class="edit-detail" @click="btnEdit()">编辑详情</div>
-							<router-link to="/netWorkCard">
-								<div class="network-manage">网卡管理</div>
-							</router-link>
-							<router-link to="amountManage">
-								<div class="amount-manage">金额管理</div>
-							</router-link>
-						</div>
-						<div class="bottom">
 							<div class="btn-enable" @click="btnEnable(1)">启用</div>
 							<div class="btn-disable" @click="btnEnable(0)">禁用</div>
+							<!--<router-link to="/netWorkCard">-->
+								<!--<div class="network-manage">网卡管理</div>-->
+							<!--</router-link>-->
+							<!--<router-link to="amountManage">-->
+								<!--<div class="amount-manage">金额管理</div>-->
+							<!--</router-link>-->
 						</div>
+						<!--<div class="bottom">-->
+							<!--<div class="btn-enable" @click="btnEnable(1)">启用</div>-->
+							<!--<div class="btn-disable" @click="btnEnable(0)">禁用</div>-->
+						<!--</div>-->
 					</div>
 					<!-- 右侧的搜索框 -->
 					<div class="search-group">
@@ -96,8 +97,9 @@
 						<el-table-column prop="whetherEnable" label="是否启用" align="center"></el-table-column>
 						<el-table-column label="操作" align="center">
 							<template slot-scope="scope">
-								<div class="more" @click="goDetail(scope.row)">查看详情</div>
 								<div class="amount" @click="manageAmount(scope.row)">金额管理</div>
+								<div class="edit" @click="btnEdit(scope.row)">编辑详情</div>
+								<div class="network" @click="manageNetwork(scope.row)">网卡管理</div>
 							</template>
 						</el-table-column>
 					</el-table>
@@ -332,7 +334,6 @@
 							balance: data[i].amount,
 							salesManager: data[i].realName,
 							salesTel: data[i].sellMobile,
-							operate: data[i].sortNum,
 							whetherEnable: data[i].enable,
 							companyId: data[i].companyId
 						})
@@ -376,16 +377,15 @@
 				this.customerData = [];
 				this.getUserList()
 			},
-			// 查看详情
-			goDetail(data) {
-				let phone = data.phone
+			// 网卡管理
+			manageNetwork(data){
+				let companyId = data.companyId
 				this.$router.push({
-					path: '/cardDetail',
+					path: '/netWorkCard',
 					query: {
-						phone: phone
+						companyId: companyId
 					}
 				})
-//				console.log(data)
 			},
 			// 金额管理
 			manageAmount(data) {
@@ -398,24 +398,18 @@
 				})
 			},
 			// 点击编辑详情按钮
-			btnEdit() {
-				if (this.currentArr.length == 0) {
-					this.$message('请先选中要编辑的选项！');
-				} else if (this.currentArr.length == 1) {
-					this.editData.editDetail = true
+			btnEdit(row) {
+				this.editData.editDetail = true
 
-					this.editData.form.customerName = this.currentArr[0].contactName
-					this.editData.form.companyName = this.currentArr[0].companyName
-					this.editData.form.customerAccount = this.currentArr[0].contactTel
-					this.editData.form.password = this.currentArr[0].password
-					this.editData.form.salesPhone = this.currentArr[0].salesTel
-					this.editData.form.salesManager = this.currentArr[0].salesManager
-					this.editData.form.email = this.currentArr[0].email
-					this.editData.form.companyId = this.currentArr[0].companyId
-					console.log(this.currentArr)
-				} else {
-					this.$message.error('编辑只能选择一项，不能多选！');
-				}
+				let form = this.editData.form;
+				form.customerName = row.contactName
+				form.companyName = row.companyName
+				form.customerAccount = row.contactTel
+				form.password = row.password
+				form.salesPhone = row.salesTel
+				form.salesManager = row.salesManager
+				form.email = row.email
+				form.companyId = row.companyId
 			},
 			// 点击保存按钮
 			saveEdit() {
@@ -539,9 +533,8 @@
 						margin-right: 25px;
 						.top {
 							display: flex;
-							justify-content: space-between;
-							.edit-detail, .network-manage, .amount-manage {
-								width: 126px;
+							.btn-enable, .btn-disable {
+								width: 100px;
 								height: 40px;
 								line-height: 40px;
 								background-color: mainBlue;
@@ -551,6 +544,10 @@
 								/*margin-right: 25px;*/
 								border-radius: 5px;
 								cursor: pointer;
+							}
+							.btn-disable {
+								margin-left: 20px;
+								background-color: #ff4c87;
 							}
 						}
 						.bottom {
@@ -593,13 +590,17 @@
 				.list-table {
 					margin-top: 30px;
 					.cell {
-						.more {
+						.network {
 							cursor: pointer;
 							color: mainBlue;
 						}
 						.amount {
 							cursor: pointer;
-							color: red;
+							color: mainBlue;
+						}
+						.edit {
+							cursor: pointer;
+							color: mainBlue;
 						}
 					}
 					.el-pagination {

@@ -17,20 +17,20 @@
 						<!-- 工具栏 -->
 						<div class="tools">
 							<!-- 添加 -->
-							<div class="add">
-								<i class="el-icon-circle-plus-outline"></i>
-								<span>添加</span>
-							</div>
-							<!-- 编辑 -->
-							<div class="edit">
-								<i class="el-icon-edit-outline"></i>
-								<span>编辑</span>
-							</div>
-							<!-- 刷新 -->
-							<div class="refresh">
-								<i class="el-icon-refresh"></i>
-								<span>刷新</span>
-							</div>
+							<!--<div class="add">-->
+								<!--<i class="el-icon-circle-plus-outline"></i>-->
+								<!--<span>添加</span>-->
+							<!--</div>-->
+							<!--&lt;!&ndash; 编辑 &ndash;&gt;-->
+							<!--<div class="edit">-->
+								<!--<i class="el-icon-edit-outline"></i>-->
+								<!--<span>编辑</span>-->
+							<!--</div>-->
+							<!--&lt;!&ndash; 刷新 &ndash;&gt;-->
+							<!--<div class="refresh">-->
+								<!--<i class="el-icon-refresh"></i>-->
+								<!--<span>刷新</span>-->
+							<!--</div>-->
 						</div>
 						<!-- 表格 -->
 						<div class="table">

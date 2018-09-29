@@ -46,3 +46,84 @@ export function format(timestamp, formats) {
     })[matches];
   });
 }
+
+// 返回套餐处理结果
+export function returnPackages(i){
+	if(i == 1){
+		return '月'
+	}else if(i == 2){
+		return '半年'
+	}else if(i == 3){
+		return '季度'
+	}else if(i ==4){
+		return '年'
+	}else {
+		return ''
+	}
+}
+
+// 返回运营商的处理结果
+export function returnOperator(i){
+	if(i == 1){
+		return '中国移动'
+	}else if(i == 2){
+		return '中国联通'
+	}else if(i == 3){
+		return '中国电信'
+	}else {
+		return ''
+	}
+}
+
+// 返回卡种类的处理结果
+export function returnCardKind(i){
+	if(i == 1){
+		return '大卡'
+	}else if(i == 2){
+		return '双切'
+	}else if(i == 3){
+		return '三切'
+	}else if(i == 4){
+		return '2*2贴片'
+	}else if(i == 5){
+		return '5*6贴片'
+	}else if(i == 6){
+		return 'eSim'
+	}else if(i == 7){
+		return 'NB'
+	}else {
+		return '其他'
+	}
+}
+
+// 返回付款方式的处理结果
+export function returnPayWay(i){
+	if(i == 1){
+		return '年付'
+	}else if(i == 2){
+		return '半年付'
+	}else if(i == 3){
+		return '季付'
+	}else if(i == 4){
+		return '月付'
+	}else if(i == 5){
+		return '后付'
+	}else {
+		return ''
+	}
+}
+
+// 返回行业卡的处理结果
+export function returnIndustryCard(i){
+	if(i == 1){
+		return '普通卡'
+	}else if(i == 2){
+		return '车联卡'
+	}else if(i == 3){
+		return 'NB'
+	}else if(i == 4){
+		return '预付充值卡'
+	}else {
+		return ''
+	}
+}

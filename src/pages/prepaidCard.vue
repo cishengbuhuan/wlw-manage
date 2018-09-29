@@ -6,16 +6,22 @@
 				<!-- 表格工具栏 -->
 				<div class="list-tools">
 					<div class="tools-top">
-						<!-- 搜索iccid -->
+						<!-- 搜索卡号 -->
 						<el-input
 								clearable
 								class="search"
-								placeholder="请输入ICCID"
+								placeholder="请输入卡号"
 								prefix-icon="el-icon-search"
-								v-model="valueIccid">
+								@change="selectTableData"
+								v-model="valueCard">
 						</el-input>
 						<!-- 运营商 -->
-						<el-select class="select" clearable v-model="valueOperator" placeholder="请选择运营商">
+						<el-select
+								class="select"
+								clearable
+								@change="selectTableData"
+								v-model="valueOperator"
+								placeholder="请选择运营商">
 							<el-option
 									v-for="item in operatorOptions"
 									:key="item.value"
@@ -24,7 +30,12 @@
 							</el-option>
 						</el-select>
 						<!-- 卡种类 -->
-						<el-select class="select" clearable v-model="valueCardKind" placeholder="请选择卡种类">
+						<el-select
+								class="select"
+								clearable
+								@change="selectTableData"
+								v-model="valueCardKind"
+								placeholder="请选择卡种类">
 							<el-option
 									v-for="item in kindOptions"
 									:key="item.value"
@@ -38,6 +49,7 @@
 								class="search"
 								placeholder="公司名称"
 								prefix-icon="el-icon-search"
+								@change="selectTableData"
 								v-model="valueCompanyName">
 						</el-input>
 					</div>
@@ -46,7 +58,7 @@
 				<!-- 测试卡表格 -->
 				<div class="table-box">
 					<el-table
-							:data="testData"
+							:data="prepaidData"
 							border
 							style="width: 100%">
 						<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
@@ -64,7 +76,11 @@
 						<el-table-column prop="packages" label="套餐" align="center"></el-table-column>
 						<el-table-column prop="discount" label="折扣" align="center"></el-table-column>
 						<el-table-column prop="way" label="付款方式" align="center"></el-table-column>
-						<el-table-column prop="operate" label="操作" align="center"></el-table-column>
+						<el-table-column label="操作" align="center">
+							<template slot-scope="scope">
+								<div class="more" @click="goDetail(scope.row)">查看详情</div>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -83,11 +99,14 @@
 </template>
 
 <script>
+	import {timestampToTime,returnPackages,
+		returnOperator,returnCardKind,
+		returnPayWay} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
-				// iccid号
-				valueIccid: '',
+				// 卡号
+				valueCard: '',
 				// 运营商的筛选
 				operatorOptions: [
 					{
@@ -112,8 +131,32 @@
 						value: '1'
 					},
 					{
-						kind: '小卡',
+						kind: '双切micro',
 						value: '2'
+					},
+					{
+						kind: '三切nano',
+						value: '3'
+					},
+					{
+						kind: '2*2贴片',
+						value: '4'
+					},
+					{
+						kind: '5*6贴片',
+						value: '5'
+					},
+					{
+						kind: 'eSim',
+						value: '6'
+					},
+					{
+						kind: 'NB',
+						value: '7'
+					},
+					{
+						kind: '其他',
+						value: '8'
 					}
 				],
 				// 卡种类的值
@@ -121,74 +164,80 @@
 				// 公司名称
 				valueCompanyName: '',
 				// 测试卡列表
-				testData: [
-					{
-						serialNum: '1',
-						cardNum: '123',
-						companyName: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						flowPackages: '30M',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						packages: '全年',
-						discount: '0.4',
-						way: '充值预付',
-						operate: '查看详情'
-					},
-					{
-						serialNum: '1',
-						cardNum: '123',
-						companyName: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						flowPackages: '30M',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						packages: '全年',
-						discount: '0.4',
-						way: '充值预付',
-						operate: '查看详情'
-					},
-					{
-						serialNum: '1',
-						cardNum: '123',
-						companyName: '上海¥¥¥¥¥¥公司',
-						operator: '电信',
-						area: '上海',
-						flowPackages: '30M',
-						actualFlow: '10',
-						entryTime: '2018-09-09',
-						cardKind: '大卡',
-						silenceDuration: '1年',
-						packages: '全年',
-						discount: '0.4',
-						way: '充值预付',
-						operate: '查看详情'
-					}
-				],
+				prepaidData: [],
 				// 分页需要的数据
-				totalCount: 123,
-				pageSize: 5,
+				totalCount: 0,
+				pageSize: 20,
 				pageNo: 1,
 			};
 		},
 		mounted() {
-
+			this.getPrepaidData()
 		},
 		methods: {
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;
+				this.getPrepaidData()
 			},
 			// 改变每页显示的条数
 			changeSize(val) {
 				this.pageSize = val;
+				this.getPrepaidData()
 			},
+			// 获取预付充值卡表格数据
+			getPrepaidData(){
+				this.$axios({
+					url: '/api/manager/businesscard/list',
+					method: 'post',
+					params: {
+						pageSize: this.pageSize,
+						pageNo: this.pageNo,
+						cardNo: this.valueCard,
+						netWork: this.valueOperator,
+						cardType: this.valueCardKind,
+						companyName: this.valueCompanyName,
+						business: 4
+					}
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					console.log(data)
+					for (let i = 0; i < data.length; i++) {
+						this.prepaidData.push({
+							serialNum: data[i].no,
+							cardNum: data[i].cardNumber,
+							companyName: data[i].companyName,
+							operator: returnOperator(data[i].netWork),
+							area: data[i].area,
+							flowPackages: data[i].userPoolSize,
+							actualFlow: data[i].poolSize,
+							entryTime: timestampToTime(data[i].serveTime),
+							cardKind: returnCardKind(data[i].cardType),
+							silenceDuration: data[i].silentPeriod,
+							packages: returnPackages(data[i].packageType),
+							discount: data[i].discount,
+							way: returnPayWay(data[i].payment),
+							deviceId: data[i].deviceId
+						})
+					}
+				})
+			},
+			// 跳转到详情页
+			goDetail(data){
+				let deviceId = data.deviceId
+				this.$router.push({
+					path: '/cardDetail',
+					query: {
+						deviceId: deviceId
+					}
+				})
+			},
+			// 筛选方法
+			selectTableData(){
+				this.prepaidData = []
+				this.getPrepaidData()
+			}
 		}
 	};
 </script>
@@ -229,6 +278,12 @@
 				/* 测试卡表格 */
 				.table-box {
 					margin-top: 70px;
+					.cell {
+						.more {
+							color: mainBlue;
+							cursor: pointer;
+						}
+					}
 					.el-pagination {
 						text-align: center;
 						margin-top: 20px;
