@@ -146,7 +146,7 @@
 					this.industryCard = returnIndustryCard(data.businessCard)
 					this.entryTime = timestampToTime(data.serveTime)
 					this.billingTime = timestampToTime(data.chargeTime)
-					this.message = data.msgTotal + '条'
+					this.message = data.msgTotal ? data.msgTotal + '条' : 0
 					this.orientationCard = data.cardDirect == 1 ? '是' : '否'
 				})
 			}

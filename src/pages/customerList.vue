@@ -99,7 +99,7 @@
 							<template slot-scope="scope">
 								<div class="amount" @click="manageAmount(scope.row)">金额管理</div>
 								<div class="edit" @click="btnEdit(scope.row)">编辑详情</div>
-								<div class="network" @click="manageNetwork(scope.row)">网卡管理</div>
+								<div class="network" @click="manageNetwork(scope.row)">卡片管理</div>
 							</template>
 						</el-table-column>
 					</el-table>
@@ -334,7 +334,7 @@
 							balance: data[i].amount,
 							salesManager: data[i].realName,
 							salesTel: data[i].sellMobile,
-							whetherEnable: data[i].enable,
+							whetherEnable: data[i].enable == '1' ? '是' : '否',
 							companyId: data[i].companyId
 						})
 					}
@@ -405,7 +405,6 @@
 				form.customerName = row.contactName
 				form.companyName = row.companyName
 				form.customerAccount = row.contactTel
-				form.password = row.password
 				form.salesPhone = row.salesTel
 				form.salesManager = row.salesManager
 				form.email = row.email

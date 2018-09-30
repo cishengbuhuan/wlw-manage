@@ -87,7 +87,7 @@
 							<el-table-column prop="packages" label="套餐" align="center"></el-table-column>
 							<el-table-column prop="discount" label="折扣" align="center"></el-table-column>
 							<el-table-column prop="way" label="付款方式" align="center"></el-table-column>
-							<el-table-column prop="result" label="响应结果" align="center"></el-table-column>
+							<!--<el-table-column prop="result" label="响应结果" align="center"></el-table-column>-->
 							<el-table-column label="操作" align="center">
 								<template slot-scope="scope">
 									<div class="more" @click="goDetail(scope.row)">查看详情</div>
@@ -703,7 +703,8 @@
 				}
 				this.operatorData[index].isSelected = true
 				this.netWork = this.operatorData[index].value
-				this.getNetWorkData()
+
+				this.getPoolPackages()
 			},
 			// 切换流量池套餐的分类
 			toggleFlow(index) {
@@ -829,6 +830,7 @@
 					}
 				}).then(res => {
 					let data = res.data.data
+					this.flowPoolData = []
 					for (let i = 0; i < data.length; i++) {
 						this.flowPoolData.push({
 							packages: data[i].name,

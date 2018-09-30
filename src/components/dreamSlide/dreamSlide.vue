@@ -114,30 +114,30 @@
 							}
 						]
 					},
-					{
-						title: '财务管理',
-						index: '5',
-						menuTwo: [
-							{
-								titleTwo: '充值明细',
-								path: '/rechargeDetails',
-								index: '5-1',
-								isShow: true
-							},
-							{
-								titleTwo: '扣款明细',
-								path: '/deductionDetails',
-								index: '5-2',
-								isShow: true
-							},
-							{
-								titleTwo: '发票管理',
-								path: '/invoiceManagement',
-								index: '5-3',
-								isShow: true
-							}
-						]
-					},
+//					{
+//						title: '财务管理',
+//						index: '5',
+//						menuTwo: [
+//							{
+//								titleTwo: '充值明细',
+//								path: '/rechargeDetails',
+//								index: '5-1',
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '扣款明细',
+//								path: '/deductionDetails',
+//								index: '5-2',
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '发票管理',
+//								path: '/invoiceManagement',
+//								index: '5-3',
+//								isShow: true
+//							}
+//						]
+//					},
 					{
 						title: '系统设置',
 						index: '6',

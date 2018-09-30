@@ -61,11 +61,11 @@
 						<el-table-column prop="actualFlow" width="130" label="实际开卡流量(M)(客户订购流量)"
 						                 align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
-						<el-table-column label="操作" align="center">
-							<template slot-scope="scope">
-								<div class="more" @click="goDetail(scope.row)">查看详情</div>
-							</template>
-						</el-table-column>
+						<!--<el-table-column label="操作" align="center">-->
+							<!--<template slot-scope="scope">-->
+								<!--<div class="more" @click="goDetail(scope.row)">查看详情</div>-->
+							<!--</template>-->
+						<!--</el-table-column>-->
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -84,7 +84,7 @@
 </template>
 
 <script>
-	import {timestampToTime} from '../api/dataUtil'
+	import {timestampToTime,returnOperator} from '../api/dataUtil'
 
 	export default {
 		data() {
@@ -228,12 +228,12 @@
 					this.totalCount = data.totalCount
 					for (let i = 0; i < data.length; i++) {
 						this.flowData.push({
-							serialNum: i + 1,
+							serialNum: data[i].no,
 							contactName: data[i].userName,
 							companyName: data[i].companyName,
-							operator: data[i].netWork,
+							operator: returnOperator(data[i].netWork),
 							area: data[i].area,
-							actualFlow: data[i].poolName,
+							actualFlow: data[i].poolSize,
 							entryTime: timestampToTime(data[i].insertTime)
 						})
 					}

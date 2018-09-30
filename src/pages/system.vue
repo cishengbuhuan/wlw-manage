@@ -146,7 +146,11 @@
 						<!-- 工具栏 -->
 						<div class="tools">
 							<!-- 角色下拉框 -->
-							<el-select clearable v-model="permissionConfig.roleValue" placeholder="请选择角色">
+							<el-select
+									clearable
+									v-model="permissionConfig.roleValue"
+									@change="searchPermission"
+									placeholder="请选择角色">
 								<el-option
 										v-for="item in permissionConfig.roleOption"
 										:key="item.value"
@@ -192,14 +196,9 @@
 							<!-- 左侧的按钮组 -->
 							<div class="btn-group">
 								<!-- 添加 -->
-								<div class="add">
+								<div class="add" @click="addSystemConfig">
 									<i class="el-icon-circle-plus-outline"></i>
 									<span>添加</span>
-								</div>
-								<!-- 编辑 -->
-								<div class="edit">
-									<i class="el-icon-edit-outline"></i>
-									<span>编辑</span>
 								</div>
 							</div>
 							<!-- 右侧的搜索组 -->
@@ -238,6 +237,11 @@
 								<el-table-column prop="key" label="键" align="center"></el-table-column>
 								<el-table-column prop="value" label="值" align="center"></el-table-column>
 								<el-table-column prop="remark" label="备注" align="center"></el-table-column>
+								<el-table-column label="操作" align="center">
+									<template slot-scope="scope">
+										<div class="edit" @click="editSystemConfig(scope.row)">编辑</div>
+									</template>
+								</el-table-column>
 							</el-table>
 							<el-pagination
 									v-if="systemConfig.totalCount > systemConfig.pageSize"
@@ -246,8 +250,8 @@
 									:current-page="systemConfig.pageNo"
 									:total="systemConfig.totalCount"
 									:page-sizes="[20, 50, 100]"
-									@size-change="changeSize"
-									@current-change="changePageNo">
+									@size-change="systemChangeSize"
+									@current-change="systemChangePageNo">
 							</el-pagination>
 						</div>
 					</div>
@@ -257,7 +261,7 @@
 		<!-- 菜单管理的添加用户的遮罩 -->
 		<div class="menu-edit-model" @click.self="closeMenuManage" v-show="menuManage.isShow">
 			<div class="edit-box">
-				<div class="box-header"></div>
+				<div class="box-header">新增</div>
 				<div class="box-body">
 					<div class="form">
 						<!-- 名称 -->
@@ -283,8 +287,8 @@
 						</div>
 						<!-- 按钮组 -->
 						<div class="btn-group">
-							<div class="btn-sure" @click="menuSure">确认</div>
-							<div class="btn-cancel">取消</div>
+							<div class="btn-sure" @click="btnMenuOperator(1)">确认</div>
+							<div class="btn-cancel" @click="btnMenuOperator(0)">取消</div>
 						</div>
 					</div>
 				</div>
@@ -384,6 +388,48 @@
 				</div>
 			</div>
 		</div>
+		<!-- 系统配置的添加遮罩 -->
+		<div class="system-config-model" @click.self="closeSystemConfig" v-show="systemConfig.isModal">
+			<div class="config-box">
+				<div class="box-header">添加</div>
+				<div class="box-body">
+					<div class="form">
+						<!-- 名称 -->
+						<div class="key form-item">
+							<span>配置键：</span>
+							<el-input
+									clearable
+									placeholder="请输入配置键"
+									v-model="systemConfig.form.key">
+							</el-input>
+						</div>
+						<!-- 代码 -->
+						<div class="value form-item">
+							<span>配置值：</span>
+							<el-input
+									clearable
+									placeholder="请输入配置值"
+									v-model="systemConfig.form.value">
+							</el-input>
+						</div>
+						<!-- 备注 -->
+						<div class="remark form-item">
+							<span>备注：</span>
+							<el-input
+									clearable
+									placeholder="请输入备注"
+									v-model="systemConfig.form.remark">
+							</el-input>
+						</div>
+						<!-- 按钮组 -->
+						<div class="btn-group">
+							<div class="btn-sure" @click="btnSystemOperator(1)">确认</div>
+							<div class="btn-cancel" @click="btnSystemOperator(0)">取消</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -393,12 +439,13 @@
 	export default {
 		data() {
 			return {
-				navIndex: 1,
+				navIndex: 0,
 				// 菜单管理
 				menuManage: {
 					isShow: false,
 					tableData: [],
 					form: {
+						menuid: '',
 						name: '',
 						codeValue: '',
 						codeOption: [
@@ -411,16 +458,16 @@
 								value: '2'
 							},
 							{
-								code: '3',
-								value: '3'
+								code: '4',
+								value: '4'
+							},
+							{
+								code: '8',
+								value: '8'
 							}
 						]
 					},
-					currentData: [],
-					// 分页需要的数据
-					totalCount: 0,
-					pageSize: 20,
-					pageNo: 1,
+					currentData: []
 				},
 				// 用户管理
 				customerManage: {
@@ -485,46 +532,8 @@
 				permissionConfig: {
 					roleValue: '',
 					roleOption: [],
-					tableData: [
-						{
-							sortNum: '1',
-							name: '字典管理',
-							checkedCode: [],
-							codeArr: [
-								{
-									name: '增加',
-									code: '1'
-								},
-								{
-									name: '编辑',
-									code: '2'
-								}
-							]
-						},
-						{
-							sortNum: '2',
-							name: '字典内容',
-							checkedCode: [],
-							codeArr: [
-								{
-									name: '增加',
-									code: '1'
-								},
-								{
-									name: '编辑',
-									code: '2'
-								},
-								{
-									name: '启用',
-									code: '3'
-								},
-								{
-									name: '禁用',
-									code: '4'
-								}
-							]
-						}
-					],
+					defaultDictid: '',
+					tableData: [],
 					// 分页需要的数据
 					totalCount: 0,
 					pageSize: 20,
@@ -540,6 +549,12 @@
 					totalCount: 0,
 					pageSize: 20,
 					pageNo: 1,
+					isModal: false,
+					form: {
+						key: '',
+						value: '',
+						remark: ''
+					}
 				},
 
 				// 申请开票的工具栏搜索
@@ -664,7 +679,7 @@
 			};
 		},
 		mounted() {
-			this.getSystemCongigList()
+			this.getSystemConfigList()
 			this.getMenuListData()
 			this.getCustomerManageList()
 			this.getPermissionRoleOptions()
@@ -672,14 +687,6 @@
 		methods: {
 			toggleNav(index) {
 				this.navIndex = index;
-			},
-			// 改变当前页数
-			changePageNo(val) {
-				this.pageNo = val;
-			},
-			// 改变每页显示的条数
-			changeSize(val) {
-				this.pageSize = val;
 			},
 			// --------------------- 菜单管理的相关方法 ---------------------
 			// 获取菜单管理列表数据
@@ -689,17 +696,21 @@
 					method: 'post'
 				}).then(res => {
 					let data = res.data.data
+					console.log(data)
+					console.log(this.menuManage.tableData)
 					for (let i = 0; i < data.length; i++) {
 						this.menuManage.tableData.push({
 							sortNum: i + 1,
 							name: data[i].menuname,
 							checkedCode: [],
-							codeArr: []
+							codeArr: [],
+							menuid: data[i].menuid
 						})
 						for (let j = 0; j < data[i].functions.length; j++) {
 							this.menuManage.tableData[i].codeArr.push({
 								name: data[i].functions[j].name,
-								code: data[i].functions[j].action
+								code: data[i].functions[j].action,
+								actionid: data[i].functions[j].actionid
 							})
 						}
 					}
@@ -711,34 +722,69 @@
 			},
 			// 新增
 			menuNewAdd(row) {
+				console.log(row)
 				this.menuManage.currentData = row.codeArr;
+				this.menuManage.form.menuid = row.menuid;
 				this.menuManage.isShow = true;
 			},
 			// 删除
 			deleteRow(row) {
 				// 当前选中的项
 				let checked = row.checkedCode;
-				// 对当前选中的选项进行便利循环
-				for (let i = 0; i < checked.length; i++) {
-					row.codeArr = row.codeArr.filter(item => {
-						return item.name.indexOf(checked[i]) < 0
-					})
+				let ids = ''
+				for(let i=0; i<row.codeArr.length; i++){
+					for(let j=0; j<checked.length; j++){
+						if(row.codeArr[i].name == checked[j]){
+							ids +=  ',' +row.codeArr[i].actionid
+						}
+					}
 				}
+				this.$axios({
+					url: '/admin/action/remove',
+					method: 'post',
+					params: {
+						dictid: row.menuid,
+						ids: ids.slice(1,ids.length),
+					}
+				}).then(res => {
+					if(res.data.code == 1){
+						this.$message.success(res.data.msg);
+						this.menuManage.tableData = []
+						this.getMenuListData()
+					}else {
+						this.$message.success(res.data.msg);
+					}
+				})
 			},
 			// 点击空白处关闭编辑的遮罩
 			closeMenuManage() {
 				this.menuManage.isShow = false
 			},
 			// 点击确认
-			menuSure() {
-				let name = this.menuManage.form.name;
-				let code = this.menuManage.form.codeValue;
-				this.menuManage.currentData.push({
-					name: name,
-					code: code
-				})
-				this.menuManage.isShow = false
-				console.log(this.menuManage.currentData)
+			btnMenuOperator(i){
+				if(i == 0){
+					this.menuManage.isShow = false
+				}else {
+					this.$axios({
+						url: '/admin/action/save',
+						method: 'post',
+						params: {
+							menuid: this.menuManage.form.menuid,
+							actionname: this.menuManage.form.name,
+							actioncode: this.menuManage.form.codeValue,
+						}
+					}).then(res => {
+						if(res.data.code == 1){
+							this.$message.success(res.data.msg);
+							this.menuManage.tableData = []
+							this.getMenuListData()
+							this.menuManage.isShow = false
+						}else {
+							this.$message.success(res.data.msg);
+							this.menuManage.isShow = false
+						}
+					})
+				}
 			},
 
 			// --------------------- 用户管理的相关方法 ---------------------
@@ -892,7 +938,8 @@
 					method: 'get'
 				}).then(res => {
 					let data = res.data.data
-					this.customerManage.totalCount = data.totalCount
+					this.customerManage.totalCount = res.data.totalCount
+					console.log(this.customerManage.totalCount)
 					for (let i = 0; i < data.length; i++) {
 						this.customerManage.listData.push({
 							serialNum: i + 1,
@@ -932,18 +979,78 @@
 							})
 						}
 					}
+					this.permissionConfig.roleValue = this.permissionConfig.roleOption[0].role
+					this.permissionConfig.defaultDictid = this.permissionConfig.roleOption[0].value
+					this.getPermissionList()
 				})
+			},
+			// 获取到权限列表
+			getPermissionList(){
+				let defaultDictid = this.permissionConfig.defaultDictid
+				this.$axios({
+					url: '/admin/rolepower/list',
+					method: 'post',
+					params: {
+						dictid: this.permissionConfig.dictid ? this.permissionConfig.dictid : defaultDictid
+					}
+				}).then(res => {
+					let data = res.data.data
+//					console.log(data)
+					console.log(this.permissionConfig.tableData)
+					for (let i = 0; i < data.length; i++) {
+						this.permissionConfig.tableData.push({
+							sortNum: i + 1,
+							name: data[i].menuname,
+							checkedCode: [],
+							codeArr: [],
+							menuid: data[i].menuid
+						})
+						for (let j = 0; j < data[i].functions.length; j++) {
+							this.permissionConfig.tableData[i].codeArr.push({
+								name: data[i].functions[j].name,
+								code: data[i].functions[j].action,
+								actionid: data[i].functions[j].actionid,
+								checked: data[i].checked
+							})
+						}
+					}
+					let result = this.permissionConfig.tableData
+					for(let i=0; i<result.length; i++){
+						for(let j=0; j<result[i].codeArr.length; j++){
+							if(result[i].codeArr[j].checked){
+								result[i].checkedCode.push(result[i].codeArr[j].name)
+							}
+						}
+					}
+				})
+			},
+			// 筛选
+			searchPermission(val){
+				this.permissionConfig.dictid = val;
+				this.permissionConfig.tableData = []
+				this.getPermissionList()
 			},
 
 
 			// --------------------- 系统配置的相关方法 ---------------------
-			getSystemCongigList() {
+			// 改变当前页数
+			systemChangePageNo(val) {
+				this.systemConfig.pageNo = val;
+				this.getSystemConfigList()
+			},
+			// 改变每页显示的条数
+			systemChangeSize(val) {
+				this.systemConfig.pageSize = val;
+				this.getSystemConfigList()
+			},
+			// 获取系统配置表格
+			getSystemConfigList() {
 				this.$axios({
 					url: '/admin/sysconfig/list?pageno=' + this.systemConfig.pageNo + '&pagesize=' + this.systemConfig.pageSize + '&syskey=' + this.systemConfig.configKey + '&sysvalue=' + this.systemConfig.configValue + '&remark=' + this.systemConfig.remark,
 					method: 'get'
 				}).then(res => {
 					let data = res.data.data
-					this.systemConfig.totalCount = data.totalCount
+					this.systemConfig.totalCount = res.data.totalCount
 					for (let i = 0; i < data.length; i++) {
 						this.systemConfig.listData.push({
 							serialNum: data[i].sysconfigid,
@@ -968,6 +1075,50 @@
 			remarkChange() {
 				this.systemConfig.listData = []
 				this.getSystemCongigList()
+			},
+			// 点击空白隐藏遮罩
+			closeSystemConfig(){
+				this.systemConfig.isModal = false
+			},
+			// 点击添加
+			addSystemConfig(){
+				this.systemConfig.isModal = true
+			},
+			// 点击保存或者取消按钮
+			btnSystemOperator(i){
+				if(i == 0){
+					this.systemConfig.key = ''
+					this.systemConfig.value = ''
+					this.systemConfig.remark = ''
+					this.systemConfig.isModal = false
+				}else {
+					this.$axios({
+						url: 'admin/sysconfig/save',
+						method: 'post',
+						params: {
+							syskey: this.systemConfig.form.key,
+							sysvalue: this.systemConfig.form.value,
+							remark: this.systemConfig.form.remark
+						}
+					}).then(res => {
+						if(res.data.code == 1){
+							this.systemConfig.listData = []
+							this.getSystemCongigList()
+							this.$message.success(res.data.data.msg);
+							this.systemConfig.isModal = false
+						}else {
+							this.$message.success(res.data.msg);
+							this.systemConfig.isModal = false
+						}
+					})
+				}
+			},
+			// 点击详情
+			editSystemConfig(data){
+				this.systemConfig.isModal = true
+				this.systemConfig.form.key = data.key
+				this.systemConfig.form.value = data.value
+				this.systemConfig.form.remark = data.remark
 			}
 		}
 	};
@@ -1214,6 +1365,12 @@
 						}
 						/* 表格 */
 						.table {
+							.cell {
+								.edit {
+									cursor: pointer;
+									color: mainBlue;
+								}
+							}
 							.el-pagination {
 								text-align: center;
 								margin-top: 20px;
@@ -1224,7 +1381,7 @@
 			}
 		}
 		/* 用户管理的添加用户的遮罩 */
-		.add-new-customer-modal, .menu-edit-model {
+		.add-new-customer-modal, .menu-edit-model, .system-config-model {
 			width: 100%;
 			height: 100%;
 			position: fixed;
@@ -1232,7 +1389,7 @@
 			top: 0;
 			z-index: 999;
 			background-color: rgba(0, 0, 0, 0.2);
-			.add-box, .edit-box {
+			.add-box, .edit-box, .config-box {
 				width: 600px;
 				height: 600px;
 				background-color: #fff;
@@ -1306,6 +1463,23 @@
 			.edit-box {
 				width: 400px;
 				height: 260px;
+			}
+			.config-box {
+				width: 400px;
+				height: 320px;
+				.box-body {
+					.form {
+						.form-item {
+							span {
+								flex: 2;
+								line-height: 40px;
+							}
+							.el-input, .el-select {
+								flex: 5;
+							}
+						}
+					}
+				}
 			}
 		}
 	}
