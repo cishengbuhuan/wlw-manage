@@ -31,22 +31,6 @@
 								v-model="valueCompanyName">
 						</el-input>
 					</div>
-					<div class="tools-bottom">
-						<!-- 充值方式 -->
-						<el-select
-								class="select"
-								clearable
-								v-model="valueWay"
-								@change="getRechargeDetail"
-								placeholder="请选择充值方式">
-							<el-option
-									v-for="item in wayOptions"
-									:key="item.value"
-									:label="item.way"
-									:value="item.value">
-							</el-option>
-						</el-select>
-					</div>
 				</div>
 				<!-- 充值明细表格 -->
 				<div class="table-box">
@@ -54,14 +38,12 @@
 							:data="detailData"
 							border
 							style="width: 100%">
-						<el-table-column prop="serialNum" label="流水号" align="center"></el-table-column>
+						<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 						<el-table-column prop="contactName" label="联系人姓名" align="center"></el-table-column>
-						<el-table-column prop="phone" label="手机号" align="center"></el-table-column>
-						<el-table-column prop="companyName" label="公司名称" align="center"></el-table-column>
-						<el-table-column prop="amount" label="充值金额" align="center"></el-table-column>
-						<el-table-column prop="time" label="充值时间" align="center"></el-table-column>
-						<el-table-column prop="way" label="充值方式" align="center"></el-table-column>
-						<el-table-column prop="status" label="充值状态" align="center"></el-table-column>
+						<el-table-column prop="contactName" label="手机号" align="center"></el-table-column>
+						<el-table-column prop="contactName" label="公司名称" align="center"></el-table-column>
+						<el-table-column prop="phone" label="账户余额" align="center"></el-table-column>
+						<el-table-column prop="companyName" label="预扣金额" align="center"></el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"

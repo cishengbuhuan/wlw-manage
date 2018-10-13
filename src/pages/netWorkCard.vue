@@ -41,12 +41,12 @@
 							<el-upload
 									action="123"
 									ref="upload"
-									:headers="uploadHeaders"
 									:http-request="uploadSectionFile"
 									:file-list="fileList">
 								<div class="batch-import">批量导入</div>
 							</el-upload>
-							<div class="export-all">全部导出</div>
+							<!--<input type="file" class="batch-import" @change="uploadSectionFile">-->
+							<div class="export-all" @click="allExport">全部导出</div>
 						</div>
 						<!-- 右侧的搜索组 -->
 						<div class="search-group">
@@ -671,9 +671,6 @@
 					discount: ''
 				},
 				fileList: [],
-				uploadHeaders: {
-					'Content-Type': 'multipart/form-data'
-				},
 				companyId: '',
 				poolId: '',
 				defaultPoolId: ''
@@ -899,51 +896,33 @@
 				this.getNetWorkData()
 			},
 
-			// 批量导入
-//			handleChange(file, fileList) {
-//				this.fileList = fileList;
-//				let ids = this.handleUpOrDel(fileList);
-//			},
-//			handleRemove(file, fileList) {
-//				this.fileList = fileList;
-//				let ids = this.handleUpOrDel(fileList);
-//			},
-//			handleUpOrDel(fileList) {
-//				let ids = "";
-//				if (fileList) {
-//					for (let i = 0; i < fileList.length; i++) {
-//						console.log(fileList[i].response);
-//						let obj = fileList[i].response;
-//						if (obj) {
-//							if (obj.code) {
-//								ids += obj.record.successResponse[0].id;
-//								if (i < fileList.length - 1) {
-//									ids += ",";
-//								}
-//							}
-//						}
-//					}
-//				}
-//				return ids;
-//			},
-			// 自定义文件上传
+			// 批量导入的自定义上传
 			uploadSectionFile(params) {
+				let that = this
 				//创建 formData 对象
 				let formData = new FormData();
 				// 向 formData 对象中添加文件
-				formData.append('file',params.file);
-				console.log(formData)
+				formData.append('upfile',params.file);
 
 				let xhr = new XMLHttpRequest();
-				xhr.open('post', 'http://192.168.1.14:8090/api/manager/baseFileImport');
-//				xhr.open('post', 'http://192.168.1.14:8090/admin/device/importOder');
-				xhr.setRequestHeader('content-type','multipart/form-data;')
+				xhr.open('post', 'http://192.168.1.10:8090/api/manager/baseFileImport');
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState == 4 && xhr.status == 200) {
 						let data = JSON.parse(xhr.responseText);
+						that.$message.success(data.msg);
 					}
 				};
 				xhr.send(formData);
+			},
+			// 全部导出
+			allExport(){
+				this.$axios({
+					url: '/api/manager/export',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					console.log(res)
+				})
 			}
 		}
 	};

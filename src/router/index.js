@@ -16,8 +16,11 @@ import flowPoolDetail from '../pages/flowPoolDetail.vue'
 import rechargeDetails from '../pages/rechargeDetails.vue'
 import deductionDetails from '../pages/deductionDetails.vue'
 import invoiceManagement from '../pages/invoiceManagement.vue'
+import businessBalanceDetail from '../pages/businessBalanceDetail.vue'
 import dictionary from '../pages/dictionary.vue'
 import system from '../pages/system.vue'
+
+import testPages from '../pages/testPages.vue'
 
 Vue.use(Router)
 
@@ -104,6 +107,11 @@ const router = new Router({
 			component: invoiceManagement
 		},
 		{
+			path: '/businessBalanceDetail',
+			name: 'businessBalanceDetail',
+			component: businessBalanceDetail
+		},
+		{
 			path: '/dictionary',
 			name: 'dictionary',
 			component: dictionary
@@ -112,6 +120,11 @@ const router = new Router({
 			path: '/system',
 			name: 'system',
 			component: system
+		},
+		{
+			path: '/testPages',
+			name: 'testPages',
+			component: testPages
 		}
 	]
 })

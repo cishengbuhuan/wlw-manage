@@ -114,30 +114,36 @@
 							}
 						]
 					},
-//					{
-//						title: '财务管理',
-//						index: '5',
-//						menuTwo: [
-//							{
-//								titleTwo: '充值明细',
-//								path: '/rechargeDetails',
-//								index: '5-1',
-//								isShow: true
-//							},
-//							{
-//								titleTwo: '扣款明细',
-//								path: '/deductionDetails',
-//								index: '5-2',
-//								isShow: true
-//							},
-//							{
-//								titleTwo: '发票管理',
-//								path: '/invoiceManagement',
-//								index: '5-3',
-//								isShow: true
-//							}
-//						]
-//					},
+					{
+						title: '财务管理',
+						index: '5',
+						menuTwo: [
+							{
+								titleTwo: '充值明细',
+								path: '/rechargeDetails',
+								index: '5-1',
+								isShow: true
+							},
+							{
+								titleTwo: '扣款明细',
+								path: '/deductionDetails',
+								index: '5-2',
+								isShow: true
+							},
+							{
+								titleTwo: '发票管理',
+								path: '/invoiceManagement',
+								index: '5-3',
+								isShow: true
+							},
+							{
+								titleTwo: '商户余额详情',
+								path: '/businessBalanceDetail',
+								index: '5-4',
+								isShow: true
+							}
+						]
+					},
 					{
 						title: '系统设置',
 						index: '6',
@@ -152,6 +158,12 @@
 								titleTwo: '系统管理',
 								path: '/system',
 								index: '6-2',
+								isShow: true
+							},
+							{
+								titleTwo: '权限测试页面',
+								path: '/testPages',
+								index: '6-3',
 								isShow: true
 							}
 						]
@@ -194,6 +206,7 @@
 							continue
 						}
 					}
+					console.log(data)
 				})
 			}
 		}

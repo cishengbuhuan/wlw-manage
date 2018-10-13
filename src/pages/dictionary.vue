@@ -20,20 +20,26 @@
 								<span @click="addDictionaryKind">添加</span>
 							</div>
 							<!-- 编辑 -->
-							<div class="edit">
-								<i class="el-icon-edit-outline"></i>
-								<span>编辑</span>
-							</div>
+							<!--<div class="edit">-->
+								<!--<i class="el-icon-edit-outline"></i>-->
+								<!--<span>编辑</span>-->
+							<!--</div>-->
 						</div>
 						<!-- 表格 -->
-						<div class="table">
-							<el-table
-									:data="dictionaryKind.tableData"
-									:show-header="dictionaryKind.showHeader"
-									style="width: 100%">
-								<el-table-column type="selection" width="55" align="center"></el-table-column>
-								<el-table-column prop="name" label="名称" align="center"></el-table-column>
-							</el-table>
+						<div class="el-tree">
+							<el-tree
+									:props="dictionaryKind.defaultProps"
+									:data="dictionaryKind.treeData"
+									show-checkbox
+									node-key="id"
+									:check-strictly="true"
+									:highlight-current="true"
+									default-expand-all
+									:expand-on-click-node="false"
+									ref="tree"
+									@check-change="checkChange"
+									@node-click="nodeClick">
+							</el-tree>
 						</div>
 					</div>
 					<!-- 字典内容 -->
@@ -43,7 +49,12 @@
 							<!-- 左侧的按钮组 -->
 							<div class="btn-group">
 								<!-- 角色 -->
-								<el-select clearable v-model="dictionaryContent.roleValue" placeholder="请选择角色">
+								<el-select
+										clearable
+										filterable
+										@change="searchRole"
+										v-model="dictionaryContent.roleValue"
+										placeholder="请选择角色">
 									<el-option
 											v-for="item in dictionaryContent.roleOptions"
 											:key="item.value"
@@ -55,11 +66,6 @@
 								<div class="add">
 									<i class="el-icon-circle-plus-outline"></i>
 									<span @click="addDictionaryContent">添加</span>
-								</div>
-								<!-- 编辑 -->
-								<div class="edit">
-									<i class="el-icon-edit-outline"></i>
-									<span>编辑</span>
 								</div>
 							</div>
 						</div>
@@ -76,13 +82,18 @@
 								<el-table-column prop="parent" label="上级字典" align="center"></el-table-column>
 								<el-table-column prop="enable" label="是否启用" align="center"></el-table-column>
 								<el-table-column prop="remark" label="备注" align="center"></el-table-column>
+								<el-table-column label="操作" align="center">
+									<template slot-scope="scope">
+										<div class="edit" @click="btnEdit(scope.row)">编辑</div>
+									</template>
+								</el-table-column>
 							</el-table>
 							<el-pagination
-									v-if="totalCount > pageSize"
+									v-if="dictionaryContent.totalCount > dictionaryContent.pageSize"
 									layout="total, sizes, prev, pager, next, jumper"
-									:page-size="pageSize"
-									:current-page="pageNo"
-									:total="totalCount"
+									:page-size="dictionaryContent.pageSize"
+									:current-page="dictionaryContent.pageNo"
+									:total="dictionaryContent.totalCount"
 									:page-sizes="[20, 50, 100]"
 									@size-change="changeSize"
 									@current-change="changePageNo">
@@ -132,8 +143,8 @@
 						</div>
 						<!-- 按钮组 -->
 						<div class="btn-group">
-							<div class="btn-sure">确认</div>
-							<div class="btn-cancel">取消</div>
+							<div class="btn-sure" @click="saveDictionaryKind(1)">确认</div>
+							<div class="btn-cancel" @click="saveDictionaryKind(0)">取消</div>
 						</div>
 					</div>
 				</div>
@@ -142,20 +153,17 @@
 		<!-- 字典内容的点击添加按钮的遮罩 -->
 		<div class="dictionary-content-add" @click.self="closeDictionaryContent" v-show="dictionaryContent.isAdd">
 			<div class="add-box">
-				<div class="box-header">添加</div>
+				<div class="box-header">{{ dictionaryContent.form.title }}</div>
 				<div class="box-body">
 					<div class="form">
 						<!-- 上级字典 -->
 						<div class="parent-category form-item">
 							<span>上级字典：</span>
-							<el-select clearable v-model="dictionaryContent.form.typeValue" placeholder="请选择上级字典">
-								<el-option
-										v-for="item in dictionaryContent.form.typeOption"
-										:key="item.value"
-										:label="item.type"
-										:value="item.value">
-								</el-option>
-							</el-select>
+							<el-input
+									clearable
+									disabled=""
+									v-model="dictionaryContent.form.parentDictionary">
+							</el-input>
 						</div>
 						<!-- 名称 -->
 						<div class="name form-item">
@@ -193,9 +201,13 @@
 							</el-input>
 						</div>
 						<!-- 按钮组 -->
-						<div class="btn-group">
-							<div class="btn-sure">确认</div>
-							<div class="btn-cancel">取消</div>
+						<div class="btn-group" v-show="dictionaryContent.form.isAdd">
+							<div class="btn-sure" @click="btnDictionaryContent(1)">确认</div>
+							<div class="btn-cancel" @click="btnDictionaryContent(0)">取消</div>
+						</div>
+						<div class="btn-group" v-show="!dictionaryContent.form.isAdd">
+							<div class="btn-sure" @click="btnEditSure(1)">确认</div>
+							<div class="btn-cancel" @click="btnEditSure(0)">取消</div>
 						</div>
 					</div>
 				</div>
@@ -213,7 +225,7 @@
 				dictionaryKind: {
 					isAdd: false,
 					form: {
-						parentCategory: '根目录',
+						parentCategory: '',
 						name: '',
 						code: '',
 						remark: ''
@@ -226,90 +238,44 @@
 							name: '运营商代理'
 						}
 					],
-					showHeader: false
+					showHeader: false,
+					defaultProps: {
+						children: 'children',
+						label: 'label'
+					},
+					treeData: [],
+					editCheckId: '',
+					checkedParentCategory: ''
 				},
 				// 字典内容
 				dictionaryContent: {
 					isAdd: false,
-					tableData: [
-						{
-							id: '1',
-							name: '管理员',
-							code: 'root',
-							parent: '',
-							enable: '',
-							remark: ''
-						},
-						{
-							id: '1',
-							name: '管理员',
-							code: 'root',
-							parent: '',
-							enable: '',
-							remark: ''
-						},
-						{
-							id: '1',
-							name: '管理员',
-							code: 'root',
-							parent: '',
-							enable: '',
-							remark: ''
-						},
-						{
-							id: '1',
-							name: '管理员',
-							code: 'root',
-							parent: '',
-							enable: '',
-							remark: ''
-						}
-					],
+					tableData: [],
 					roleValue: '',
-					roleOptions: [
-						{
-							role: '角色1',
-							value: '1'
-						},
-						{
-							role: '角色2',
-							value: '2'
-						},
-						{
-							role: '角色3',
-							value: '3'
-						}
-					],
+					roleOptions: [],
+					// 选中的角色的id、dicttype
+					selectedRoleId: '',
+					selectedDicttype: '',
 					form: {
-						typeValue: '',
-						typeOption: [
-							{
-								type: '类型1',
-								value: '1'
-							},
-							{
-								type: '类型2',
-								value: '2'
-							},
-							{
-								type: '类型3',
-								value: '3'
-							}
-						],
+						title: '',
+						parentDictionary: '',
 						isEnable: '1',
 						name: '',
 						code: '',
-						remark: ''
-					}
+						remark: '',
+						isAdd: true
+					},
+					// 分页需要的数据
+					totalCount: 0,
+					pageSize: 20,
+					pageNo: 1,
+					oldData: []
 				},
-				// 分页需要的数据
-				totalCount: 123,
-				pageSize: 5,
-				pageNo: 1,
 			};
 		},
 		mounted() {
-
+			this.getAllDictionary()
+			this.getAllRoleOptions()
 		},
 		methods: {
 			toggleNav(index) {
@@ -324,22 +290,278 @@
 				this.pageSize = val;
 			},
 			// -------------- 字典类别的相关方法 --------------
+			// 获取全部字典
+			getAllDictionary(){
+				this.$axios({
+					url: '/admin/dict/all',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					let result = []
+					for(let i=0; i<data.length; i++){
+						if(data[i].dicttype === 'sys'){
+							result.push(data[i])
+						}
+					}
+
+					let dict=[];
+					for(let t of result){
+						if(t.dictpid === 0){
+							t.id= t.dictid
+							t.label = t.dictname
+							dict.push(t)
+							getItem(t)
+						}
+					}
+					function getItem(p){
+						for(let a of result){
+							if(p.dictid === a.dictpid){
+								if(!p.hasOwnProperty('children')){
+									p.children=[];
+								}
+								a.id= a.dictid
+								a.label = a.dictname
+								p['children'].push(a)
+								getItem(a);
+							}
+						}
+						return
+					}
+					this.dictionaryKind.treeData = dict
+					console.log(dict)
+				})
+			},
 			// 点击添加按钮
 			addDictionaryKind() {
-				this.dictionaryKind.isAdd = true;
+				if (this.dictionaryKind.editCheckId == '') {
+					this.$message.info("未选中节点");
+				} else {
+					this.dictionaryKind.isAdd = true;
+					this.dictionaryKind.form.parentCategory = this.dictionaryKind.checkedParentCategory;
+					this.$message.success("新增节点id："+JSON.stringify(this.dictionaryKind.editCheckId));
+				}
+			},
+			// 点击添加弹框的保存按钮
+			saveDictionaryKind(i){
+				if(i==0){
+					this.dictionaryKind.isAdd = false
+				}else {
+					this.$axios({
+						url: '/admin/dict/save',
+						method: 'post',
+						params: {
+							dictname: this.dictionaryKind.form.name,
+							dictcode: this.dictionaryKind.form.code,
+							remark: this.dictionaryKind.form.remark,
+							dictpid: this.dictionaryKind.editCheckId,
+							dicttype: 'sys',
+							dictid: '0',
+							enable: '1',
+							orderindex: '1'
+						}
+					}).then(res => {
+						if(res.data.code == 1){
+							this.$message.success(res.data.msg);
+						}else {
+							this.$message.error(res.data.msg);
+						}
+						this.dictionaryKind.form.name = ''
+						this.dictionaryKind.form.code = ''
+						this.dictionaryKind.form.remark = ''
+						this.dictionaryKind.isAdd = false
+						// 清空字典类别，重新获取数据
+						this.dictionaryKind.treeData = []
+						this.getAllDictionary()
+					})
+				}
 			},
 			// 点击空白处让盒子消失
 			closeDictionaryKind() {
 				this.dictionaryKind.isAdd = false
 			},
+			// 点击编辑按钮
+			editRow(data){
+				this.dictionaryKind.isAdd = true;
+				console.log(data)
+			},
+			checkChange(item, node, self){
+				if (node==true) {//点击未选中复选框
+					this.dictionaryKind.editCheckId = item.id;
+					this.dictionaryKind.checkedParentCategory = item.label;
+					this.$refs.tree.setCheckedKeys([item.id]);
+				} else {
+					if (this.dictionaryKind.editCheckId == item.id) {//点击已选中复选框，保证至少一个选中
+						this.$refs.tree.setCheckedKeys([item.id]);
+					}
+				}
+			},
+			nodeClick(item, node, self){
+				this.dictionaryKind.editCheckId = item.id;
+				this.dictionaryKind.checkedParentCategory = item.label;
+				this.$refs.tree.setCheckedKeys([item.id]);
+				console.log(item)
+			},
 			// -------------- 字典内容的相关方法 --------------
+			// 获取到所有的角色下拉选项 和 字典内容
+			getAllRoleOptions(){
+				this.$axios({
+					url: '/admin/dict/all',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					let result = []
+					for(let i=0; i<data.length; i++){
+						if(data[i].dicttype === 'sys'){
+							result.push(data[i])
+						}
+					}
+					this.dictionaryContent.roleOptions = []
+					for(let i=0; i<result.length; i++){
+						// 获取字典内容的角色下拉选项
+						this.dictionaryContent.roleOptions.push({
+							role: result[i].dictname,
+							value: result[i].dictid,
+							dicttype: result[i].dicttype,
+						})
+
+						for(let j=0; j<result.length; j++){
+							if(result[i].dictid === result[j].dictpid){
+								result[j].parent = result[i].dictname
+								// 获取到字典内容的数据表
+								this.dictionaryContent.tableData.push({
+									id: result[j].dictid,
+									name: result[j].dictname,
+									code: result[j].dictcode,
+									parent: result[j].parent,
+									enable: result[j].enable === 1 ? '是' : '否',
+									remark: result[j].remark,
+									dictpid: result[j].dictpid,
+									dicttype: result[j].dicttype,
+								})
+							}
+						}
+					}
+					this.dictionaryContent.oldData = this.dictionaryContent.tableData
+				})
+			},
 			// 点击添加按钮
 			addDictionaryContent() {
+				if(this.dictionaryContent.selectedRoleId == ''){
+					this.$message.info('请先选择对应的角色！');
+				}else {
+					this.dictionaryContent.isAdd = true;
+					this.dictionaryContent.form.title = '添加'
+					this.dictionaryContent.form.isAdd = true
+				}
+			},
+			// 添加弹出框的保存或者取消
+			btnDictionaryContent(i){
+				if(i==0){
+					this.dictionaryContent.isAdd = false;
+				}else {
+					this.$axios({
+						url: '/admin/dict/save',
+						method: 'post',
+						params: {
+							dictpid: this.dictionaryContent.selectedRoleId,
+							dictname: this.dictionaryContent.form.name,
+							dictcode: this.dictionaryContent.form.code,
+							enable: this.dictionaryContent.form.isEnable,
+							remark: this.dictionaryContent.form.remark,
+							dictid: 0,
+							dicttype: this.dictionaryContent.selectedDicttype
+						}
+					}).then(res => {
+						if(res.data.code == 1){
+							this.$message.success(res.data.msg);
+							this.dictionaryContent.tableData = []
+							this.getAllRoleOptions()
+						}else {
+							this.$message.error(res.data.msg);
+						}
+						// 清空弹框内容并关闭弹框
+						this.dictionaryContent.selectedRoleId = ''
+						this.dictionaryContent.form.name = ''
+						this.dictionaryContent.form.code = ''
+						this.dictionaryContent.form.remark = ''
+						this.dictionaryContent.isAdd = false;
+					})
+				}
+			},
+			// 编辑
+			btnEdit(data){
 				this.dictionaryContent.isAdd = true;
+				this.dictionaryContent.form.title = '编辑'
+				this.dictionaryContent.form.isAdd = false
+
+				this.dictionaryContent.form.parentDictionary = data.parent
+				this.dictionaryContent.form.name = data.name
+				this.dictionaryContent.form.code = data.code
+				this.dictionaryContent.form.dictpid = data.dictpid
+				this.dictionaryContent.form.remark = data.remark
+				this.dictionaryContent.form.isEnable = data.enable === '是' ? '1' : '0'
+				this.dictionaryContent.selectedRoleId = data.id
+				this.dictionaryContent.selectedDicttype = data.dicttype
+				console.log(data)
+			},
+			// 编辑的保存
+			btnEditSure(i){
+				if(i==0){
+					this.dictionaryContent.isAdd = false;
+				}else {
+					this.$axios({
+						url: '/admin/dict/modify',
+						method: 'post',
+						params: {
+							dictpid: this.dictionaryContent.form.dictpid,
+							dictname: this.dictionaryContent.form.name,
+							dictcode: this.dictionaryContent.form.code,
+							enable: this.dictionaryContent.form.isEnable,
+							remark: this.dictionaryContent.form.remark,
+							dictid: this.dictionaryContent.selectedRoleId,
+							dicttype: this.dictionaryContent.selectedDicttype
+						}
+					}).then(res => {
+						if(res.data.code == 1){
+							this.$message.success(res.data.msg);
+							this.dictionaryContent.tableData = []
+							this.getAllRoleOptions()
+						}else {
+							this.$message.error(res.data.msg);
+						}
+						// 清空弹框内容并关闭弹框
+						this.dictionaryContent.selectedRoleId = ''
+						this.dictionaryContent.form.name = ''
+						this.dictionaryContent.form.code = ''
+						this.dictionaryContent.form.remark = ''
+						this.dictionaryContent.isAdd = false;
+					})
+				}
 			},
 			// 点击空白处让盒子消失
 			closeDictionaryContent() {
 				this.dictionaryContent.isAdd = false;
+			},
+			// 筛选字典内容的数据
+			searchRole(val){
+				this.dictionaryContent.selectedRoleId = val
+				this.dictionaryContent.tableData = this.dictionaryContent.oldData
+				let obj = {};
+				obj = this.dictionaryContent.roleOptions.find((item)=>{
+					return item.value === val;
+				});
+				this.dictionaryContent.selectedDicttype = obj.dicttype
+				// 当前选中的上级字典
+				this.dictionaryContent.form.parentDictionary = obj.role
+				let filterData = []
+				let oldData = this.dictionaryContent.tableData
+				for(let i=0; i<oldData.length; i++){
+					if(oldData[i].parent === obj.role){
+						filterData.push(oldData[i])
+					}
+				}
+				console.log(filterData)
+				this.dictionaryContent.tableData = filterData
 			}
 		}
 	};
@@ -415,8 +637,14 @@
 							}
 						}
 						/* 表格 */
-						.table {
+						.el-tree {
 							border-top: 1px solid #ebeef5;
+							/*.cell {
+								.add {
+									cursor: pointer;
+									color: mainBlue;
+								}
+							}*/
 						}
 					}
 					/* 字典内容 */
@@ -459,6 +687,12 @@
 						}
 						/* 表格 */
 						.table {
+							.cell {
+								.edit {
+									cursor: pointer;
+									color: mainBlue;
+								}
+							}
 							.el-pagination {
 								text-align: center;
 								margin-top: 20px;
@@ -630,5 +864,11 @@
 				}
 			}
 		}
+	}
+</style>
+<style>
+	.el-tree .el-tree-node__content {
+		height: 50px;
+		border-bottom: 1px solid #ebeef5;
 	}
 </style>

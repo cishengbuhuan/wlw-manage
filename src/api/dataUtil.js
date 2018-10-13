@@ -127,3 +127,29 @@ export function returnIndustryCard(i){
 		return ''
 	}
 }
+
+// 返回充值状态的处理结果
+export function returnRechargeStatus(i){
+	if(i == 1){
+		return '未支付'
+	}else if(i == 2){
+		return '支付成功'
+	}else if(i == 3){
+		return '取消订单'
+	}else {
+		return ''
+	}
+}
+
+// 返回充值方式的处理结果
+export function returnRechargeWay(i){
+	if(i == 1){
+		return '平台充值'
+	}else if(i == 2){
+		return '支付宝'
+	}else if(i == 3){
+		return '线下转账'
+	}else {
+		return ''
+	}
+}

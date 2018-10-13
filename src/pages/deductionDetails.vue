@@ -11,6 +11,7 @@
 								clearable
 								class="contact-name"
 								placeholder="联系人姓名"
+								@change="getDeductionDetail"
 								v-model="valueContact">
 						</el-input>
 						<!-- 手机号 -->
@@ -18,6 +19,7 @@
 								clearable
 								class="phone"
 								placeholder="手机号"
+								@change="getDeductionDetail"
 								v-model="valuePhone">
 						</el-input>
 						<!-- 搜索公司名称 -->
@@ -25,12 +27,17 @@
 								clearable
 								class="company-name"
 								placeholder="公司名称"
+								@change="getDeductionDetail"
 								v-model="valueCompanyName">
 						</el-input>
 					</div>
 					<div class="tools-bottom">
 						<!-- 扣款类型 -->
-						<el-select class="select" clearable v-model="valueType" placeholder="请选择扣款类型">
+						<el-select class="select"
+						           clearable
+						           v-model="valueType"
+						           @change="getDeductionDetail"
+						           placeholder="请选择扣款类型">
 							<el-option
 									v-for="item in typeOptions"
 									:key="item.value"
@@ -39,11 +46,15 @@
 							</el-option>
 						</el-select>
 						<!-- 扣款方式 -->
-						<el-select class="select" clearable v-model="valueType" placeholder="请选择扣款方式">
+						<el-select class="select"
+						           clearable
+						           v-model="valueWay"
+						           @change="getDeductionDetail"
+						           placeholder="请选择扣款方式">
 							<el-option
-									v-for="item in typeOptions"
+									v-for="item in wayOptions"
 									:key="item.value"
-									:label="item.type"
+									:label="item.way"
 									:value="item.value">
 							</el-option>
 						</el-select>
@@ -64,11 +75,6 @@
 						<el-table-column prop="way" label="扣款方式" align="center"></el-table-column>
 						<el-table-column prop="type" label="扣款类型" align="center"></el-table-column>
 						<el-table-column prop="status" label="扣款状态" align="center"></el-table-column>
-						<el-table-column label="操作" align="center">
-							<template slot-scope="scope">
-								<span class="more" @click="goDetail(scope.row)">查看详情</span>
-							</template>
-						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -87,6 +93,7 @@
 </template>
 
 <script>
+	import {timestampToTime,returnRechargeStatus,returnRechargeWay} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
@@ -100,97 +107,136 @@
 				// 类型的筛选
 				typeOptions: [
 					{
-						type: '类型1',
+						type: '月租扣款',
 						value: '1'
 					},
 					{
-						type: '类型2',
+						type: '超流扣款',
 						value: '2'
-					},
-					{
-						type: '类型3',
-						value: '3'
 					}
 				],
 				// 类型的值
 				valueType: '',
-				// 卡种类的筛选
-				kindOptions: [
+
+
+				// 扣款方式的筛选
+				wayOptions: [
 					{
-						kind: '大卡',
+						way: '月扣',
 						value: '1'
 					},
 					{
-						kind: '小卡',
+						way: '季度扣',
 						value: '2'
+					},
+					{
+						way: '半年扣',
+						value: '3'
+					},
+					{
+						way: '年扣',
+						value: '4'
+					},
+					{
+						way: '后付',
+						value: '5'
 					}
 				],
-				// 卡种类的值
-				valueCardKind: '',
+				// 扣款方式的值
+				valueWay: '',
 
 				// 扣款明细表格数据
-				detailData: [
-					{
-						serialNum: 1,
-						contactName: '杭三',
-						phone: '123456',
-						companyName: '上海***信息技术有限公司',
-						batch: '2018-09-09',
-						time: '2018-09-10',
-						way: '月扣',
-						type: '预扣款',
-						status: '扣款成功'
-					},
-					{
-						serialNum: 2,
-						contactName: '杭三',
-						phone: '123456',
-						companyName: '上海***信息技术有限公司',
-						batch: '2018-09-09',
-						time: '2018-09-10',
-						way: '月扣',
-						type: '预扣款',
-						status: '扣款成功'
-					},
-					{
-						serialNum: 3,
-						contactName: '杭三',
-						phone: '123456',
-						companyName: '上海***信息技术有限公司',
-						batch: '2018-09-09',
-						time: '2018-09-10',
-						way: '月扣',
-						type: '预扣款',
-						status: '扣款成功'
-					}
-				],
+				detailData: [],
 				// 分页需要的数据
-				totalCount: 123,
-				pageSize: 5,
+				totalCount: 0,
+				pageSize: 20,
 				pageNo: 1,
 			};
 		},
 		mounted() {
-
+			this.getDeductionDetail()
 		},
 		methods: {
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;
+				this.getDeductionDetail()
 			},
 			// 改变每页显示的条数
 			changeSize(val) {
 				this.pageSize = val;
+				this.getDeductionDetail()
 			},
-			// 跳转到详情页
-			goDetail(data) {
-//				let deviceId = data.deviceId
-//				this.$router.push({
-//					path:'/cardDetail',
-//					query:{
-//						deviceId: deviceId
-//					}
-//				})
+			// 获取到扣款明细到表格数据
+			getDeductionDetail(){
+				this.$axios({
+					url: '/api/pay/bill/list',
+					method: 'post',
+					params: {
+						pageSize: this.pageSize,
+						pageNo: this.pageNo,
+						mobile: this.valuePhone,
+						userName: this.valueContact,
+						companyName: this.valueCompanyName,
+						payType: this.valueType,
+						payWay: this.valueWay
+					}
+				}).then(res => {
+					let data = res.data.data
+					this.totalCount = res.data.totalCount
+					this.detailData = []
+					for (let i = 0; i < data.length; i++) {
+						this.detailData.push({
+							serialNum: data[i].no,
+							contactName: data[i].userName,
+							phone: data[i].mobile,
+							companyName: data[i].companyName,
+							batch: data[i].cardServerTime,
+							time: timestampToTime(data[i].createTime),
+							way: this.returnDeductionWay(data[i].payType),
+							type: this.returnDeductionType(data[i].payType),
+							status: this.returnDeductionStatus(data[i].payStatus)
+						})
+					}
+				})
+			},
+			// 返回扣款方式的处理结果
+			returnDeductionWay(i){
+				if(i==1){
+					return '月扣'
+				}else if(i==2){
+					return '季度扣'
+				}else if(i==3){
+					return '半年扣'
+				}else if(i==4){
+					return '年扣'
+				}else if(i==5){
+					return '后付'
+				}else{
+					return ''
+				}
+			},
+			// 返回扣款类型的处理结果
+			returnDeductionType(i){
+				if(i==1){
+					return '月租扣款'
+				}else if(i==2){
+					return '超流扣款'
+				}else{
+					return ''
+				}
+			},
+			// 返回扣款状态的处理结果
+			returnDeductionStatus(i){
+				if(i==1){
+					return '扣款成功'
+				}else if(i==2){
+					return '扣款失败'
+				}else if(i==3){
+					return '余额不足'
+				}else{
+					return ''
+				}
 			}
 		}
 	};

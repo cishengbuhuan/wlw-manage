@@ -159,7 +159,7 @@
 								</el-option>
 							</el-select>
 							<!-- 保存按钮 -->
-							<div class="save-permission">
+							<div class="save-permission" @click="saveMenuPermission">
 								<i class="el-icon-circle-plus"></i>保存菜单权限
 							</div>
 						</div>
@@ -297,7 +297,7 @@
 		<!-- 用户管理的添加用户的遮罩 -->
 		<div class="add-new-customer-modal" @click.self="closeAddNew" v-show="customerManage.isAddNewCustomer">
 			<div class="add-box">
-				<div class="box-header">新增用户</div>
+				<div class="box-header">{{ customerManage.form.title }}</div>
 				<div class="box-body">
 					<div class="form">
 						<!-- 姓名 -->
@@ -391,7 +391,7 @@
 		<!-- 系统配置的添加遮罩 -->
 		<div class="system-config-model" @click.self="closeSystemConfig" v-show="systemConfig.isModal">
 			<div class="config-box">
-				<div class="box-header">添加</div>
+				<div class="box-header">{{ systemConfig.form.title }}</div>
 				<div class="box-body">
 					<div class="form">
 						<!-- 名称 -->
@@ -439,7 +439,7 @@
 	export default {
 		data() {
 			return {
-				navIndex: 0,
+				navIndex: 2,
 				// 菜单管理
 				menuManage: {
 					isShow: false,
@@ -494,6 +494,7 @@
 					isAddNewCustomer: false,
 					// 添加用户的表单
 					form: {
+						title: '',
 						name: '',
 						// 性别
 						sexValue: '',
@@ -551,6 +552,7 @@
 					pageNo: 1,
 					isModal: false,
 					form: {
+						title: '',
 						key: '',
 						value: '',
 						remark: ''
@@ -696,8 +698,8 @@
 					method: 'post'
 				}).then(res => {
 					let data = res.data.data
-					console.log(data)
-					console.log(this.menuManage.tableData)
+//					console.log(data)
+//					console.log(this.menuManage.tableData)
 					for (let i = 0; i < data.length; i++) {
 						this.menuManage.tableData.push({
 							sortNum: i + 1,
@@ -791,6 +793,7 @@
 			// 点击添加按钮
 			manageAdd() {
 				this.customerManage.isAddNewCustomer = true
+				this.customerManage.form.title = '添加用户'
 				this.customerManage.isAdd = true
 				this.customerManage.form.name = '';
 				this.customerManage.form.sexValue = '';
@@ -852,6 +855,7 @@
 				} else {
 					this.customerManage.isAddNewCustomer = true;
 					this.customerManage.isAdd = false
+					this.customerManage.form.title = '编辑用户'
 					this.getRoleOptions();
 					this.customerManage.form.name = this.customerManage.selectArr[0].name;
 					this.customerManage.form.sexValue = this.customerManage.selectArr[0].sex;
@@ -996,14 +1000,15 @@
 				}).then(res => {
 					let data = res.data.data
 //					console.log(data)
-					console.log(this.permissionConfig.tableData)
+//					console.log(this.permissionConfig.tableData)
 					for (let i = 0; i < data.length; i++) {
 						this.permissionConfig.tableData.push({
 							sortNum: i + 1,
 							name: data[i].menuname,
 							checkedCode: [],
 							codeArr: [],
-							menuid: data[i].menuid
+							menuid: data[i].menuid,
+							parentId: data[i].parentid
 						})
 						for (let j = 0; j < data[i].functions.length; j++) {
 							this.permissionConfig.tableData[i].codeArr.push({
@@ -1013,6 +1018,7 @@
 								checked: data[i].checked
 							})
 						}
+//						console.log('menuid为'+this.permissionConfig.tableData[i].menuid,'父级元素ID为'+this.permissionConfig.tableData[i].parentId)
 					}
 					let result = this.permissionConfig.tableData
 					for(let i=0; i<result.length; i++){
@@ -1029,6 +1035,36 @@
 				this.permissionConfig.dictid = val;
 				this.permissionConfig.tableData = []
 				this.getPermissionList()
+			},
+			// 点击保存菜单权限
+			saveMenuPermission(){
+				let data = this.permissionConfig.tableData
+				console.log(data)
+				for(let i=0; i<data.length; i++){
+//					console.log(data[i])
+					if(data[i].checkedCode.length > 0){
+						// 对选中的项进行遍历
+						let sumCodeArr = []
+						let sumCode = 0
+						for(let j=0; j<data[i].checkedCode.length; j++){
+							// 对当前行对所有的项进行遍历
+							for(let k=0; k<data[i].codeArr.length; k++){
+								// 匹配到选中的项，把选中的项的ID拿过来
+								if(data[i].codeArr[k].name === data[i].checkedCode[j]){
+									sumCodeArr.push(data[i].codeArr[k].code)
+								}
+							}
+						}
+//						console.log(sumCodeArr)
+						for(let i=0; i<sumCodeArr.length; i++){
+							sumCode += sumCodeArr[i]
+						}
+//						console.log(sumCode)
+//						console.log('menuid为----'+data[i].menuid,'||父级元素为----'+data[i].parentId,'||选中的有===========================' + data[i].name, '||' + sumCode)
+						console.log('id->'+data[i].menuid,'|| 父id->'+data[i].parentId,'|| '+data[i].name,'|| 总->'+sumCode)
+
+					}
+				}
 			},
 
 
@@ -1083,6 +1119,7 @@
 			// 点击添加
 			addSystemConfig(){
 				this.systemConfig.isModal = true
+				this.systemConfig.form.title = '添加'
 			},
 			// 点击保存或者取消按钮
 			btnSystemOperator(i){
@@ -1113,9 +1150,10 @@
 					})
 				}
 			},
-			// 点击详情
+			// 编辑
 			editSystemConfig(data){
 				this.systemConfig.isModal = true
+				this.systemConfig.form.title = '编辑'
 				this.systemConfig.form.key = data.key
 				this.systemConfig.form.value = data.value
 				this.systemConfig.form.remark = data.remark
