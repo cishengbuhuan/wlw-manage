@@ -390,10 +390,14 @@
 			// 金额管理
 			manageAmount(data) {
 				let companyId = data.companyId
+				let companyName = data.companyName
+				let contactName = data.contactName
 				this.$router.push({
 					path: '/amountManage',
 					query: {
-						companyId: companyId
+						companyId: companyId,
+						companyName: companyName,
+						contactName: contactName
 					}
 				})
 			},

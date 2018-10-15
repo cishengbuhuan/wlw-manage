@@ -55,7 +55,7 @@
 										       v-model="platformRecharge.rechargeAmount.customAmount">
 									</li>
 								</ul>
-								<div class="btn-recharge">立即充值</div>
+								<div class="btn-recharge" @click="btnRecharge">立即充值</div>
 							</div>
 						</div>
 					</div>
@@ -72,7 +72,7 @@
 							<el-table-column prop="amount" label="充值金额" width='70' align="center"></el-table-column>
 							<el-table-column label="操作" align="center">
 								<template slot-scope="scope">
-									<span class="sure" @click="openSure(scope.row)">确认开通</span>
+									<span class="sure" @click="openSure(scope.row)">确认到账</span>
 									<span class="refuse" @click="openSure(scope.row)">拒绝</span>
 								</template>
 							</el-table-column>
@@ -129,14 +129,16 @@
 		data() {
 			return {
 				// tab切换的索引
-				navIndex: 1,
+				navIndex: 0,
+				accountId: '',
 				// 平台充值
 				platformRecharge: {
 					// 基本信息
 					baseInfo: {
-						companyName: '上海****信息技术有限公司',
-						accountBalance: '0',
-						contactName: '张三'
+						companyId: '',
+						companyName: '',
+						accountBalance: '',
+						contactName: ''
 					},
 					// 充值金额
 					rechargeAmount: {
@@ -188,16 +190,47 @@
 			};
 		},
 		mounted() {
+			this.getParams()
 			this.getOfflineRecord()
 			this.getRechargeRecord()
 			this.getExpensesRecord()
+			this.getAccountBalance()
+			this.getAccountInfo()
 		},
 		methods: {
+			// 获取到传递过来的参数
+			getParams(){
+				this.platformRecharge.baseInfo.companyId = this.$route.query.companyId
+				this.platformRecharge.baseInfo.companyName = this.$route.query.companyName
+				this.platformRecharge.baseInfo.contactName = this.$route.query.contactName
+//				console.log(this.companyId,this.companyName,this.contactName)
+			},
+			// 获取到当前登录者的信息
+			getAccountInfo(){
+				this.$axios({
+					url: '/api/pay/getAccount',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					this.accountId = data.accountid
+					console.log(data,this.accountId)
+				})
+			},
 			// 切换头部的tab栏
 			toggleNav(i) {
 				this.navIndex = i;
 			},
 			// ---------------- 平台充值的相关方法 ----------------
+			// 获取到账户余额
+			getAccountBalance(){
+				this.$axios({
+					url: '/api/pay/getCompany',
+					method: 'post'
+				}).then(res => {
+					let data = res.data.data
+					this.platformRecharge.baseInfo.accountBalance = data.amount
+				})
+			},
 			// 切换选中的充值金额
 			toggleRechargeAmount(index) {
 				let amount = this.platformRecharge.rechargeAmount.amount
@@ -221,6 +254,37 @@
 						this.platformRecharge.rechargeAmount.customAmount == '自定义金额'
 					}
 				}
+			},
+			// 点击充值
+			btnRecharge(){
+				this.$confirm('确认充值嘛?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					this.$axios({
+						url: '/api/pay/order/save',
+						method: 'post',
+						params: {
+							amount: this.platformRecharge.rechargeAmount.currentAmount,
+							companyId: this.platformRecharge.baseInfo.companyId,
+							payType: 1
+						}
+					}).then(res => {
+						if(res.data.code === 1){
+							this.$message.success(res.data.msg);
+							this.getAccountBalance()
+						}else {
+							this.$message.error(res.data.msg);
+						}
+					})
+				}).catch(() => {
+					console.log(this)
+					this.$message({
+						type: 'info',
+						message: '已取消充值！'
+					});
+				});
 			},
 			// ---------------- 线下转账的相关方法 ----------------
 			// 获取线下转账记录

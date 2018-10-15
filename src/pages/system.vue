@@ -999,7 +999,7 @@
 					}
 				}).then(res => {
 					let data = res.data.data
-//					console.log(data)
+					console.log(data)
 //					console.log(this.permissionConfig.tableData)
 					for (let i = 0; i < data.length; i++) {
 						this.permissionConfig.tableData.push({
@@ -1033,13 +1033,15 @@
 			// 筛选
 			searchPermission(val){
 				this.permissionConfig.dictid = val;
+				console.log(val)
 				this.permissionConfig.tableData = []
 				this.getPermissionList()
 			},
 			// 点击保存菜单权限
 			saveMenuPermission(){
 				let data = this.permissionConfig.tableData
-				console.log(data)
+				let params = []
+//				console.log(data)
 				for(let i=0; i<data.length; i++){
 //					console.log(data[i])
 					if(data[i].checkedCode.length > 0){
@@ -1061,10 +1063,39 @@
 						}
 //						console.log(sumCode)
 //						console.log('menuid为----'+data[i].menuid,'||父级元素为----'+data[i].parentId,'||选中的有===========================' + data[i].name, '||' + sumCode)
-						console.log('id->'+data[i].menuid,'|| 父id->'+data[i].parentId,'|| '+data[i].name,'|| 总->'+sumCode)
-
+//						console.log('id->'+data[i].menuid,'|| 父id->'+data[i].parentId,'|| '+data[i].name,'|| 总->'+sumCode)
+						params.push({
+							parentId: data[i].parentId,
+							menuid: data[i].menuid,
+							dictid: this.permissionConfig.dictid ? this.permissionConfig.dictid : this.permissionConfig.defaultDictid,
+							actionvalue: sumCode
+						})
 					}
 				}
+				// 定义一个用来存放父级元素的数组
+				let parentArr = []
+//				+function findParent(id,arr){
+					// 对当前选中的列进行循环遍历
+					for(let i=0;i<params.length; i++){
+						// 对所有的数据进行遍历
+						for(let j=0; j<data.length; j++){
+							if(params[i].parentId === data[j].menuid){
+								console.log(data[j])
+								parentArr.push(data[j])
+//								findParent(arr[j])
+							}
+						}
+					}
+//				}(0,data)
+				console.log(params)
+				// 通过当前的menuid去寻找所有的父节点
+//				function findParent(id){
+//					for(let i=0; i<data.length; i++){
+//						if(id.parentId === data[i].menuid){
+//
+//						}
+//					}
+//				}
 			},
 
 
