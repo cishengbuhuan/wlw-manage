@@ -63,14 +63,20 @@
 							style="width: 100%">
 						<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
-						<el-table-column prop="companyName" label="公司名称" align="center"></el-table-column>
+						<el-table-column prop="companyName" label="开户公司" align="center"></el-table-column>
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 						<el-table-column prop="area" label="归属地" align="center"></el-table-column>
+						<el-table-column prop="flowPackages" width="130" label="流量池套餐(M)(归入地)"
+						                 align="center"></el-table-column>
 						<el-table-column prop="actualFlow" width="130" label="实际开卡流量(M)(客户订购流量)"
 						                 align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
 						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
-						<!--<el-table-column prop="silenceDuration" label="沉默期时长" align="center"></el-table-column>-->
+						<el-table-column prop="silenceDuration" label="沉默期时长" align="center"></el-table-column>
+						<el-table-column prop="packages" label="套餐" align="center"></el-table-column>
+						<el-table-column prop="discount" label="折扣" align="center"></el-table-column>
+						<el-table-column prop="way" label="付款方式" align="center"></el-table-column>
+						<!--<el-table-column prop="result" label="响应结果" align="center"></el-table-column>-->
 						<el-table-column label="操作" align="center">
 							<template slot-scope="scope">
 								<div class="more" @click="goDetail(scope.row)">查看详情</div>
@@ -94,7 +100,9 @@
 </template>
 
 <script>
-	import {timestampToTime} from '../api/dataUtil'
+	import {format,timestampToTime,returnPackages,
+		returnOperator,returnCardKind,
+		returnPayWay} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
@@ -171,15 +179,17 @@
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;
+				this.getTestCardList()
 			},
 			// 改变每页显示的条数
 			changeSize(val) {
 				this.pageSize = val;
+				this.getTestCardList()
 			},
 			// 获取测试卡列表
 			getTestCardList(){
 				this.$axios({
-					url: '/api/manager/testcard/list',
+					url: '/api/manager/card/list',
 					method: 'post',
 					params: {
 						pageSize: this.pageSize,
@@ -187,24 +197,33 @@
 						cardNo: this.valueCardNum,
 						netWork: this.valueOperator,
 						cardType: this.valueCardKind,
-						companyName: this.valueCompanyName
+						companyName: this.valueCompanyName,
+						businessNo: 5
 					}
 				}).then(res => {
 					let data = res.data.data
 					this.totalCount = res.data.totalCount
-					console.log(data)
+//					console.log(data)
+					this.testData = []
 					for (let i = 0; i < data.length; i++) {
 						this.testData.push({
 							serialNum: data[i].no,
 							cardNum: data[i].cardNumber,
 							companyName: data[i].companyName,
-							operator: data[i].netWork,
+							operator: returnOperator(data[i].netWork),
 							area: data[i].area,
+							flowPackages: data[i].userPoolSize,
 							actualFlow: data[i].poolSize,
 							entryTime: timestampToTime(data[i].serveTime),
-							cardKind: data[i].cardType,
-							silenceDuration: data[i].enable,
-							id: data[i].id
+							cardKind: returnCardKind(data[i].cardType),
+							silenceDuration: data[i].silentPeriod,
+							packages: returnPackages(data[i].packageType),
+							discount: data[i].discount,
+							way: returnPayWay(data[i].payment),
+							result: data[i].netResult,
+							deviceId: data[i].deviceId,
+							companyId: data[i].companyId,
+							netWork: data[i].netWork,
 						})
 					}
 				})
@@ -212,6 +231,7 @@
 
 			// 筛选
 			selectTableList(){
+				this.pageNo = 1
 				this.testData = []
 				this.getTestCardList()
 			},

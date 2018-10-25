@@ -37,16 +37,14 @@
 						<!-- 左侧的按钮组 -->
 						<div class="btn-group">
 							<div class="new-add" @click="btnAdd">新增单卡</div>
-							<!--action="http://192.168.1.14:8090/api/manager/baseFileImport"-->
-							<el-upload
-									action="123"
-									ref="upload"
-									:http-request="uploadSectionFile"
-									:file-list="fileList">
-								<div class="batch-import">批量导入</div>
-							</el-upload>
-							<!--<input type="file" class="batch-import" @change="uploadSectionFile">-->
-							<div class="export-all" @click="allExport">全部导出</div>
+							<!--<el-upload-->
+									<!--action="123"-->
+									<!--ref="upload"-->
+									<!--:http-request="uploadSectionFile"-->
+									<!--:file-list="fileList">-->
+								<!--<div class="batch-import">批量导入</div>-->
+							<!--</el-upload>-->
+							<a class="export-all" :href="downloadHref" download="导出文件.xls">全部导出</a>
 						</div>
 						<!-- 右侧的搜索组 -->
 						<div class="search-group">
@@ -74,7 +72,7 @@
 								style="width: 100%">
 							<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 							<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
-							<el-table-column prop="company" label="开户公司" align="center"></el-table-column>
+							<el-table-column prop="companyName" label="开户公司" align="center"></el-table-column>
 							<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 							<el-table-column prop="area" label="归属地" align="center"></el-table-column>
 							<el-table-column prop="flowPackages" width="130" label="流量池套餐(M)(归入地)"
@@ -680,6 +678,17 @@
 			this.getCompanyId()
 			this.getPoolPackages()
 		},
+		computed: {
+			downloadHref(){
+//				let baseUrl = 'http://www.tangjinqian.cn:8080/matrix/api/manager/export',
+				let baseUrl = 'http://www.91dream.net/matrix/api/manager/export',
+					companyId = this.companyId,
+					netWork = this.netWork ? this.netWork : this.defaultNetWork,
+					poolId = this.poolId ? this.poolId : this.defaultPoolId,
+					cardNo = this.cardNum
+				return `${baseUrl}?companyId=${companyId}&netWork=${netWork}&poolId=${poolId}&cardNo=${cardNo}`
+			}
+		},
 		methods: {
 			// 接收传递过来的companyId
 			getCompanyId(){
@@ -701,6 +710,7 @@
 				this.operatorData[index].isSelected = true
 				this.netWork = this.operatorData[index].value
 
+				this.getNetWorkData()
 				this.getPoolPackages()
 			},
 			// 切换流量池套餐的分类
@@ -857,6 +867,7 @@
 				}).then(res => {
 					let data = res.data.data
 					this.totalCount = res.data.totalCount
+					this.netWorkData = []
 					for (let i = 0; i < data.length; i++) {
 						this.netWorkData.push({
 							serialNum: data[i].no,
@@ -905,7 +916,8 @@
 				formData.append('upfile',params.file);
 
 				let xhr = new XMLHttpRequest();
-				xhr.open('post', 'http://192.168.1.10:8090/api/manager/baseFileImport');
+//				xhr.open('post', 'http://www.tangjinqian.cn:8080/matrix/api/manager/baseFileImport');
+				xhr.open('post', 'http://www.91dream.net/matrix/api/manager/baseFileImport');
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState == 4 && xhr.status == 200) {
 						let data = JSON.parse(xhr.responseText);
@@ -913,16 +925,6 @@
 					}
 				};
 				xhr.send(formData);
-			},
-			// 全部导出
-			allExport(){
-				this.$axios({
-					url: '/api/manager/export',
-					method: 'post'
-				}).then(res => {
-					let data = res.data.data
-					console.log(res)
-				})
 			}
 		}
 	};

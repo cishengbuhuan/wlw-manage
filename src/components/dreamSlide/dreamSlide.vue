@@ -84,99 +84,126 @@
 								path: '/prepaidCard',
 								index: '3-2',
 								isShow: true
-							}
-						]
-					},
-					{
-						title: '流量池管理',
-						index: '4',
-						menuTwo: [
-							{
-								titleTwo: '中国移动',
-								path: '/flowPool/1',
-								index: '4-1',
-								type: 1,
-								isShow: true
 							},
 							{
-								titleTwo: '中国联通',
-								path: '/flowPool/2',
-								index: '4-2',
-								type: 2,
-								isShow: true
+								titleTwo: '卡片导入',
+								path: '/upload',
+								index: '3-3',
+								isShow: false
 							},
 							{
-								titleTwo: '中国电信',
-								path: '/flowPool/3',
-								index: '4-3',
-								type: 3,
+								titleTwo: '异常卡',
+								path: '/abnormalCard',
+								index: '3-4',
 								isShow: true
 							}
 						]
 					},
-					{
-						title: '财务管理',
-						index: '5',
-						menuTwo: [
-							{
-								titleTwo: '充值明细',
-								path: '/rechargeDetails',
-								index: '5-1',
-								isShow: true
-							},
-							{
-								titleTwo: '扣款明细',
-								path: '/deductionDetails',
-								index: '5-2',
-								isShow: true
-							},
-							{
-								titleTwo: '发票管理',
-								path: '/invoiceManagement',
-								index: '5-3',
-								isShow: true
-							},
-							{
-								titleTwo: '商户余额详情',
-								path: '/businessBalanceDetail',
-								index: '5-4',
-								isShow: true
-							}
-						]
-					},
-					{
-						title: '系统设置',
-						index: '6',
-						menuTwo: [
-							{
-								titleTwo: '字典管理',
-								path: '/dictionary',
-								index: '6-1',
-								isShow: true
-							},
-							{
-								titleTwo: '系统管理',
-								path: '/system',
-								index: '6-2',
-								isShow: true
-							},
-							{
-								titleTwo: '权限测试页面',
-								path: '/testPages',
-								index: '6-3',
-								isShow: true
-							}
-						]
-					}
+//					{
+//						title: '流量池管理',
+//						index: '4',
+//						menuTwo: [
+//							{
+//								titleTwo: '中国移动',
+//								path: '/flowPool/1',
+//								index: '4-1',
+//								type: 1,
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '中国联通',
+//								path: '/flowPool/2',
+//								index: '4-2',
+//								type: 2,
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '中国电信',
+//								path: '/flowPool/3',
+//								index: '4-3',
+//								type: 3,
+//								isShow: true
+//							}
+//						]
+//					},
+//					{
+//						title: '财务管理',
+//						index: '5',
+//						menuTwo: [
+//							{
+//								titleTwo: '充值明细',
+//								path: '/rechargeDetails',
+//								index: '5-1',
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '扣款明细',
+//								path: '/deductionDetails',
+//								index: '5-2',
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '发票管理',
+//								path: '/invoiceManagement',
+//								index: '5-3',
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '商户余额详情',
+//								path: '/businessBalanceDetail',
+//								index: '5-4',
+//								isShow: true
+//							}
+//						]
+//					},
+//					{
+//						title: '系统设置',
+//						index: '6',
+//						menuTwo: [
+//							{
+//								titleTwo: '字典管理',
+//								path: '/dictionary',
+//								index: '6-1',
+//								isShow: true
+//							},
+//							{
+//								titleTwo: '系统管理',
+//								path: '/system',
+//								index: '6-2',
+//								isShow: true
+//							},
+////							{
+////								titleTwo: '权限测试页面',
+////								path: '/testPages',
+////								index: '6-3',
+////								isShow: true
+////							}
+//						]
+//					}
 				]
 			};
 		},
 		mounted() {
+			this.getAccount()
 			this.getMenuList()
 		},
 		methods: {
 			toPath(path) {
 				this.$router.replace(path)
+			},
+			// 获取登录者信息
+			getAccount(){
+				this.$axios({
+					url: '/api/pay/getAccount',
+					method: 'post'
+				}).then(res => {
+					let loginName = res.data.data.loginname
+					if(loginName !== 'admin') {
+						this.menus[2].menuTwo[2].isShow = false
+					}else {
+						this.menus[2].menuTwo[2].isShow = true
+					}
+				})
 			},
 			// 获取到菜单列表
 			getMenuList(){

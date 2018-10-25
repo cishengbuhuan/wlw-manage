@@ -104,6 +104,12 @@
 						</div>
 						<div class="item"></div>
 					</div>
+					<div class="item-group">
+						<!-- 网络响应结果 -->
+						<div class="item">
+							网络响应结果: {{ netResult }}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -113,7 +119,7 @@
 <script>
 	import {timestampToTime,returnPackages,
 		returnOperator,returnCardKind,
-		returnPayWay,returnIndustryCard} from '../api/dataUtil'
+		returnPayWay,returnIndustryCard,returnCardLevel} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
@@ -136,7 +142,9 @@
 				packages: '',
 				discount: '',
 				payWay: '',
-				directedIP: ''
+				directedIP: '',
+				// 网络响应结果
+				netResult: ''
 			};
 		},
 		mounted() {
@@ -160,7 +168,7 @@
 					this.cardkind = returnCardKind(data.cardType)
 					this.openCompany = data.companyName
 					this.operator = returnOperator(data.netWork)
-					this.cardLevel = data.cardLevel
+					this.cardLevel = returnCardLevel(data.cardLevel)
 					this.poolPackages = data.userPoolSize
 					this.buyFlow = data.poolSize
 					this.silenceDuration = data.silentPeriod
@@ -175,6 +183,8 @@
 					this.discount = data.discount
 					this.payWay = returnPayWay(data.payment)
 					this.directedIP = data.cardDirectIp
+					// 网络响应结果
+					this.netResult = data.netResult
 				})
 			}
 

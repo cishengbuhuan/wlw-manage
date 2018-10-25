@@ -11,7 +11,7 @@
 								clearable
 								class="contact-name"
 								placeholder="联系人姓名"
-								@change="getRechargeDetail"
+								@change="searchList"
 								v-model="valueContact">
 						</el-input>
 						<!-- 手机号 -->
@@ -19,7 +19,7 @@
 								clearable
 								class="phone"
 								placeholder="手机号"
-								@change="getRechargeDetail"
+								@change="searchList"
 								v-model="valuePhone">
 						</el-input>
 						<!-- 搜索公司名称 -->
@@ -27,7 +27,7 @@
 								clearable
 								class="company-name"
 								placeholder="公司名称"
-								@change="getRechargeDetail"
+								@change="searchList"
 								v-model="valueCompanyName">
 						</el-input>
 					</div>
@@ -40,10 +40,16 @@
 							style="width: 100%">
 						<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 						<el-table-column prop="contactName" label="联系人姓名" align="center"></el-table-column>
-						<el-table-column prop="contactName" label="手机号" align="center"></el-table-column>
-						<el-table-column prop="contactName" label="公司名称" align="center"></el-table-column>
-						<el-table-column prop="phone" label="账户余额" align="center"></el-table-column>
-						<el-table-column prop="companyName" label="预扣金额" align="center"></el-table-column>
+						<el-table-column prop="mobile" label="手机号" align="center"></el-table-column>
+						<el-table-column prop="companyName" label="公司名称" align="center"></el-table-column>
+						<el-table-column prop="amount" label="账户余额" align="center"></el-table-column>
+						<el-table-column prop="preAmount" label="预扣金额" align="center"></el-table-column>
+						<el-table-column label="操作" align="center">
+							<template slot-scope="scope">
+								<div class="amount" @click="manageAmount(scope.row)">充值</div>
+								<div class="edit" @click="btnEdit(scope.row)">查看详情</div>
+							</template>
+						</el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -106,7 +112,7 @@
 			// 获取充值明细表格数据
 			getRechargeDetail() {
 				this.$axios({
-					url: '/api/pay/order/list',
+					url: '/api/manager/finance/company/list',
 					method: 'post',
 					params: {
 						pageSize: this.pageSize,
@@ -114,7 +120,7 @@
 						mobile: this.valuePhone,
 						userName: this.valueContact,
 						companyName: this.valueCompanyName,
-						payType: this.valueWay,
+						payType: this.valueWay
 					}
 				}).then(res => {
 					let data = res.data.data
@@ -122,14 +128,12 @@
 					this.detailData = []
 					for (let i = 0; i < data.length; i++) {
 						this.detailData.push({
-							serialNum: data[i].orderId,
+							serialNum: data[i].no,
 							contactName: data[i].userName,
-							phone: data[i].mobile,
-							companyName: data[i].companyName,
+							mobile: data[i].mobile,
+							companyName: data[i].name,
 							amount: data[i].amount,
-							time: timestampToTime(data[i].createTime),
-							way: returnRechargeWay(data[i].payType),
-							status: returnRechargeStatus(data[i].payStatus)
+							preAmount: data[i].predictPay,
 						})
 					}
 				})
@@ -142,6 +146,11 @@
 			// 改变每页显示的条数
 			changeSize(val) {
 				this.pageSize = val;
+				this.getRechargeDetail()
+			},
+			// 查询
+			searchList(){
+				this.pageNo = 1;
 				this.getRechargeDetail()
 			}
 		}

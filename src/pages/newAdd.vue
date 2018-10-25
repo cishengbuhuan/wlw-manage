@@ -15,7 +15,7 @@
 						<div class="customer-name form-item">
 							<div class="label">
 								<div class="icon"></div>
-								<span>客户名称<i>*</i> :</span>
+								<span>联系人<i>*</i> :</span>
 							</div>
 							<el-input
 									clearable
@@ -41,11 +41,11 @@
 						<div class="customer-account form-item">
 							<div class="label">
 								<div class="icon"></div>
-								<span>客户账号<i>*</i> :</span>
+								<span>登录账号<i>*</i> :</span>
 							</div>
 							<el-input
 									clearable
-									placeholder="请输入客户账号"
+									placeholder="请输入联系人手机号"
 									v-model="form.customerAccount">
 							</el-input>
 						</div>
@@ -134,12 +134,12 @@
 					url: '/api/manager/customer/updateCustomer',
 					method: 'post',
 					params: {
-						userName: this.form.customerName,
-						companyName: this.form.companyName,
+						userName: (this.form.customerName),
+						companyName: (this.form.companyName),
 						phone: this.form.customerAccount,
 						password: this.form.password,
 						sellMobile: this.form.salesPhone,
-						sellManager: this.form.salesManager,
+						sellManager: (this.form.salesManager),
 						email: this.form.email
 					}
 				}).then(res => {

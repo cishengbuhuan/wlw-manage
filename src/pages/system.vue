@@ -1010,6 +1010,8 @@
 							menuid: data[i].menuid,
 							parentId: data[i].parentid
 						})
+						// 清空选项
+						this.permissionConfig.tableData[i].codeArr = []
 						for (let j = 0; j < data[i].functions.length; j++) {
 							this.permissionConfig.tableData[i].codeArr.push({
 								name: data[i].functions[j].name,
@@ -1074,28 +1076,65 @@
 				}
 				// 定义一个用来存放父级元素的数组
 				let parentArr = []
-//				+function findParent(id,arr){
-					// 对当前选中的列进行循环遍历
-					for(let i=0;i<params.length; i++){
-						// 对所有的数据进行遍历
-						for(let j=0; j<data.length; j++){
-							if(params[i].parentId === data[j].menuid){
-								console.log(data[j])
-								parentArr.push(data[j])
-//								findParent(arr[j])
-							}
+				// 对当前选中的列进行循环遍历
+				for(let i=0;i<params.length; i++){
+					findParent(params[i].parentId,data)
+				}
+				function findParent(id,arr){
+					for(let j=0; j<arr.length; j++){
+						if(id === arr[j].menuid){
+							parentArr.push(arr[j])
+							findParent(arr[j].parentId,data)
 						}
 					}
-//				}(0,data)
-				console.log(params)
-				// 通过当前的menuid去寻找所有的父节点
-//				function findParent(id){
-//					for(let i=0; i<data.length; i++){
-//						if(id.parentId === data[i].menuid){
-//
-//						}
-//					}
-//				}
+				}
+				let result = []
+				for(let m=0; m<parentArr.length; m++){
+					result.push({
+						menuid: parentArr[m].menuid,
+						dictid: this.permissionConfig.dictid ? this.permissionConfig.dictid : this.permissionConfig.defaultDictid,
+						actionvalue: -1
+					})
+				}
+				// 对result进行去重
+				let newResult = [];
+				let obj = {};
+				for(let a of result){
+					let key  = a.menuid
+					if(obj[key]){
+						continue
+					}else {
+						obj[key] = a;
+						newResult.push(a)
+					}
+				}
+				let newParams = []
+				for(let i=0; i<params.length; i++){
+					newParams.push({
+						menuid: params[i].menuid,
+						dictid: params[i].dictid,
+						actionvalue: params[i].actionvalue
+					})
+				}
+				let resultParams = newParams.concat(newResult)
+
+
+				console.log(resultParams)
+				this.$axios({
+					url: '/admin/rolepower/save',
+					method: 'post',
+					params: {
+						rolejson: JSON.stringify(resultParams)
+					}
+				}).then(res => {
+					if(res.data.code === 1){
+						this.$message.success(res.data.msg)
+
+						this.getPermissionList()
+					}else {
+						this.$message.error(res.data.msg)
+					}
+				})
 			},
 
 

@@ -6,7 +6,7 @@ import index from '../pages/index.vue'
 import customerList from '../pages/customerList.vue'
 import newAdd from '../pages/newAdd.vue'
 import netWorkCard from '../pages/netWorkCard.vue'
-import amountManage from '../pages/amountManage.vue'
+import recharge from '../pages/recharge.vue'
 import testCard from '../pages/testCard.vue'
 import testCardDetail from '../pages/testCardDetail.vue'
 import cardDetail from '../pages/cardDetail.vue'
@@ -19,6 +19,8 @@ import invoiceManagement from '../pages/invoiceManagement.vue'
 import businessBalanceDetail from '../pages/businessBalanceDetail.vue'
 import dictionary from '../pages/dictionary.vue'
 import system from '../pages/system.vue'
+import upload from '../pages/upload.vue'
+import abnormalCard from '../pages/abnormalCard.vue'
 
 import testPages from '../pages/testPages.vue'
 
@@ -57,9 +59,9 @@ const router = new Router({
 			component: netWorkCard
 		},
 		{
-			path: '/amountManage',
-			name: 'amountManage',
-			component: amountManage
+			path: '/recharge',
+			name: 'recharge',
+			component: recharge
 		},
 		{
 			path: '/testCard',
@@ -125,6 +127,16 @@ const router = new Router({
 			path: '/testPages',
 			name: 'testPages',
 			component: testPages
+		},
+		{
+			path: '/upload',
+			name: 'upload',
+			component: upload
+		},
+		{
+			path: '/abnormalCard',
+			name: 'abnormalCard',
+			component: abnormalCard
 		}
 	]
 })

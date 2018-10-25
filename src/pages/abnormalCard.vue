@@ -1,25 +1,25 @@
 <template>
 	<div class="testCard-wrap">
 		<div class="content">
-			<!-- 测试卡列表 -->
+			<!-- 异常卡列表 -->
 			<div class="customer-list">
 				<!-- 表格工具栏 -->
 				<div class="list-tools">
 					<div class="tools-top">
-						<!-- 搜索卡号 -->
+						<!-- 搜索卡号或iccid -->
 						<el-input
 								clearable
 								class="search"
-								placeholder="请输入卡号"
+								placeholder="请输入卡号或者ICCID"
+								@change="selectTableList"
 								prefix-icon="el-icon-search"
-								@change="selectTableData"
-								v-model="valueCard">
+								v-model="valueCardNum">
 						</el-input>
 						<!-- 运营商 -->
 						<el-select
 								class="select"
 								clearable
-								@change="selectTableData"
+								@change="selectTableList"
 								v-model="valueOperator"
 								placeholder="请选择运营商">
 							<el-option
@@ -29,13 +29,27 @@
 									:value="item.value">
 							</el-option>
 						</el-select>
-						<!-- 卡种类 -->
+						<!-- 归属地 -->
 						<el-select
 								class="select"
 								clearable
-								@change="selectTableData"
+								@change="selectTableList"
+								v-model="valueOperator"
+								placeholder="请选择归属地">
+							<el-option
+									v-for="item in operatorOptions"
+									:key="item.value"
+									:label="item.operator"
+									:value="item.value">
+							</el-option>
+						</el-select>
+						<!-- 行业卡 -->
+						<el-select
+								class="select"
+								clearable
+								@change="selectTableList"
 								v-model="valueCardKind"
-								placeholder="请选择卡种类">
+								placeholder="请选择行业卡">
 							<el-option
 									v-for="item in kindOptions"
 									:key="item.value"
@@ -43,13 +57,13 @@
 									:value="item.value">
 							</el-option>
 						</el-select>
-						<!-- 搜索公司名称 -->
+						<!-- 搜索商户名称 -->
 						<el-input
 								clearable
 								class="search"
-								placeholder="公司名称"
+								placeholder="请输入商户名称"
+								@change="selectTableList"
 								prefix-icon="el-icon-search"
-								@change="selectTableData"
 								v-model="valueCompanyName">
 						</el-input>
 					</div>
@@ -58,30 +72,18 @@
 				<!-- 测试卡表格 -->
 				<div class="table-box">
 					<el-table
-							:data="prepaidData"
+							:data="testData"
 							border
 							style="width: 100%">
 						<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
-						<el-table-column prop="companyName" label="开户公司" align="center"></el-table-column>
+						<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
 						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
 						<el-table-column prop="area" label="归属地" align="center"></el-table-column>
-						<el-table-column prop="flowPackages" width="130" label="流量池套餐(M)(归入地)"
-						                 align="center"></el-table-column>
-						<el-table-column prop="actualFlow" width="130" label="实际开卡流量(M)(客户订购流量)"
-						                 align="center"></el-table-column>
+						<el-table-column prop="industryCard" label="行业卡" align="center"></el-table-column>
+						<el-table-column prop="customerName" label="商户名称" align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
-						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
-						<el-table-column prop="silenceDuration" label="沉默期时长" align="center"></el-table-column>
-						<el-table-column prop="packages" label="套餐" align="center"></el-table-column>
-						<el-table-column prop="discount" label="折扣" align="center"></el-table-column>
-						<el-table-column prop="way" label="付款方式" align="center"></el-table-column>
-						<!--<el-table-column prop="result" label="响应结果" align="center"></el-table-column>-->
-						<el-table-column label="操作" align="center">
-							<template slot-scope="scope">
-								<div class="more" @click="goDetail(scope.row)">查看详情</div>
-							</template>
-						</el-table-column>
+						<el-table-column prop="error" label="错误说明" align="center"></el-table-column>
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -100,14 +102,12 @@
 </template>
 
 <script>
-	import {timestampToTime,returnPackages,
-		returnOperator,returnCardKind,
-		returnPayWay} from '../api/dataUtil'
+	import {returnOperator,timestampToTime,returnIndustryCard} from '../api/dataUtil'
 	export default {
 		data() {
 			return {
 				// 卡号
-				valueCard: '',
+				valueCardNum: '',
 				// 运营商的筛选
 				operatorOptions: [
 					{
@@ -165,84 +165,76 @@
 				// 公司名称
 				valueCompanyName: '',
 				// 测试卡列表
-				prepaidData: [],
+				testData: [],
 				// 分页需要的数据
 				totalCount: 0,
 				pageSize: 20,
-				pageNo: 1,
+				pageNo: 1
 			};
 		},
 		mounted() {
-			this.getPrepaidData()
+			this.getTestCardList()
 		},
 		methods: {
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;
-				this.getPrepaidData()
+				this.getTestCardList()
 			},
 			// 改变每页显示的条数
 			changeSize(val) {
 				this.pageSize = val;
-				this.getPrepaidData()
+				this.getTestCardList()
 			},
-			// 获取预付充值卡表格数据
-			getPrepaidData(){
+			// 获取测试卡列表
+			getTestCardList(){
 				this.$axios({
 					url: '/api/manager/card/list',
 					method: 'post',
 					params: {
 						pageSize: this.pageSize,
 						pageNo: this.pageNo,
-						cardNo: this.valueCard,
+						cardNo: this.valueCardNum,
 						netWork: this.valueOperator,
 						cardType: this.valueCardKind,
 						companyName: this.valueCompanyName,
-						businessNo: 4
+						netResult: '1'
 					}
 				}).then(res => {
 					let data = res.data.data
 					this.totalCount = res.data.totalCount
-					this.prepaidData = []
 //					console.log(data)
+					this.testData = []
 					for (let i = 0; i < data.length; i++) {
-						this.prepaidData.push({
+						this.testData.push({
 							serialNum: data[i].no,
 							cardNum: data[i].cardNumber,
-							companyName: data[i].companyName,
+							iccid: data[i].iccid,
 							operator: returnOperator(data[i].netWork),
 							area: data[i].area,
-							flowPackages: data[i].userPoolSize,
-							actualFlow: data[i].poolSize,
+							industryCard: returnIndustryCard(data[i].businessCard),
+							customerName: data[i].companyName,
 							entryTime: timestampToTime(data[i].serveTime),
-							cardKind: returnCardKind(data[i].cardType),
-							silenceDuration: data[i].silentPeriod,
-							packages: returnPackages(data[i].packageType),
-							discount: data[i].discount,
-							way: returnPayWay(data[i].payment),
-							result: data[i].netResult,
-							deviceId: data[i].deviceId,
-							companyId: data[i].companyId,
-							netWork: data[i].netWork,
+							error: data[i].netResult
 						})
 					}
 				})
 			},
-			// 跳转到详情页
+
+			// 筛选
+			selectTableList(){
+				this.pageNo = 1
+				this.testData = []
+				this.getTestCardList()
+			},
 			goDetail(data){
-				let deviceId = data.deviceId
+				let id = data.id
 				this.$router.push({
-					path: '/cardDetail',
+					path: '/testCardDetail',
 					query: {
-						deviceId: deviceId
+						id: id
 					}
 				})
-			},
-			// 筛选方法
-			selectTableData(){
-				this.pageNo = 1;
-				this.prepaidData = []
-				this.getPrepaidData()
 			}
 		}
 	};

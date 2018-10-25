@@ -153,3 +153,16 @@ export function returnRechargeWay(i){
 		return ''
 	}
 }
+
+// 返回卡片等级的处理结果
+export function returnCardLevel(i){
+	if(i == 1){
+		return '消费级'
+	}else if(i == 2){
+		return '工业级'
+	}else if(i == 3){
+		return '车规级'
+	}else {
+		return ''
+	}
+}

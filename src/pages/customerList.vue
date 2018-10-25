@@ -11,20 +11,20 @@
 						<div class="num">{{ customerCount.total }}</div>
 					</div>
 					<!-- 在线数 -->
-					<div class="info-item">
-						<div class="tips online"><i></i><span>在线数</span></div>
-						<div class="num">{{ customerCount.online }}</div>
-					</div>
-					<!-- 离线数 -->
-					<div class="info-item">
-						<div class="tips offline"><i></i><span>离线数</span></div>
-						<div class="num">{{ customerCount.offline }}</div>
-					</div>
-					<!-- 欠费数 -->
-					<div class="info-item arrears">
-						<div class="tips arrears"><i></i><span>欠费数</span></div>
-						<div class="num">{{ customerCount.arrears }}</div>
-					</div>
+					<!--<div class="info-item">-->
+						<!--<div class="tips online"><i></i><span>在线数</span></div>-->
+						<!--<div class="num">{{ customerCount.online }}</div>-->
+					<!--</div>-->
+					<!--&lt;!&ndash; 离线数 &ndash;&gt;-->
+					<!--<div class="info-item">-->
+						<!--<div class="tips offline"><i></i><span>离线数</span></div>-->
+						<!--<div class="num">{{ customerCount.offline }}</div>-->
+					<!--</div>-->
+					<!--&lt;!&ndash; 欠费数 &ndash;&gt;-->
+					<!--<div class="info-item arrears">-->
+						<!--<div class="tips arrears"><i></i><span>欠费数</span></div>-->
+						<!--<div class="num">{{ customerCount.arrears }}</div>-->
+					<!--</div>-->
 				</div>
 			</div>
 			<!-- 客户列表 -->
@@ -97,7 +97,7 @@
 						<el-table-column prop="whetherEnable" label="是否启用" align="center"></el-table-column>
 						<el-table-column label="操作" align="center">
 							<template slot-scope="scope">
-								<div class="amount" @click="manageAmount(scope.row)">金额管理</div>
+								<!--<div class="amount" @click="manageAmount(scope.row)">金额管理</div>-->
 								<div class="edit" @click="btnEdit(scope.row)">编辑详情</div>
 								<div class="network" @click="manageNetwork(scope.row)">卡片管理</div>
 							</template>
@@ -323,6 +323,7 @@
 				}).then(res => {
 					let data = res.data.data
 					this.totalCount = res.data.totalCount
+					this.customerData = []
 					for (let i = 0; i < data.length; i++) {
 						this.customerData.push({
 							sortNum: data[i].no,
@@ -375,6 +376,7 @@
 			// 筛选组
 			btnSearch() {
 				this.customerData = [];
+				this.pageNo = 1
 				this.getUserList()
 			},
 			// 网卡管理
