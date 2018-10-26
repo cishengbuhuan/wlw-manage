@@ -30,30 +30,25 @@
 							</el-option>
 						</el-select>
 						<!-- 归属地 -->
-						<el-select
-								class="select"
+						<el-input
 								clearable
+								class="search"
+								placeholder="请输入归属地"
 								@change="selectTableList"
-								v-model="valueOperator"
-								placeholder="请选择归属地">
-							<el-option
-									v-for="item in operatorOptions"
-									:key="item.value"
-									:label="item.operator"
-									:value="item.value">
-							</el-option>
-						</el-select>
+								prefix-icon="el-icon-search"
+								v-model="valueArea">
+						</el-input>
 						<!-- 行业卡 -->
 						<el-select
 								class="select"
 								clearable
 								@change="selectTableList"
-								v-model="valueCardKind"
+								v-model="valueIndustryCard"
 								placeholder="请选择行业卡">
 							<el-option
-									v-for="item in kindOptions"
+									v-for="item in industryOptions"
 									:key="item.value"
-									:label="item.kind"
+									:label="item.industry"
 									:value="item.value">
 							</el-option>
 						</el-select>
@@ -69,10 +64,10 @@
 					</div>
 					<div class="tools-bottom"></div>
 				</div>
-				<!-- 测试卡表格 -->
+				<!-- 异常卡表格 -->
 				<div class="table-box">
 					<el-table
-							:data="testData"
+							:data="abnormalData"
 							border
 							style="width: 100%">
 						<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
@@ -84,6 +79,11 @@
 						<el-table-column prop="customerName" label="商户名称" align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
 						<el-table-column prop="error" label="错误说明" align="center"></el-table-column>
+						<!--<el-table-column label="操作" align="center">-->
+							<!--<template slot-scope="scope">-->
+								<!--<div class="more" @click="open(scope.row)">根据</div>-->
+							<!--</template>-->
+						<!--</el-table-column>-->
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"
@@ -108,6 +108,7 @@
 			return {
 				// 卡号
 				valueCardNum: '',
+
 				// 运营商的筛选
 				operatorOptions: [
 					{
@@ -125,8 +126,9 @@
 				],
 				// 运营商的值
 				valueOperator: '',
-				// 卡种类的筛选
-				kindOptions: [
+
+				// 归属地的筛选
+				areaOptions: [
 					{
 						kind: '大卡',
 						value: '1'
@@ -160,12 +162,40 @@
 						value: '8'
 					}
 				],
-				// 卡种类的值
-				valueCardKind: '',
+				// 归属地的值
+				valueArea: '',
+
+				// 行业卡的筛选
+				industryOptions: [
+					{
+						industry: '普通卡',
+						value: '1'
+					},
+					{
+						industry: '车联卡',
+						value: '2'
+					},
+					{
+						industry: 'NB',
+						value: '3'
+					},
+					{
+						industry: '预付充值卡',
+						value: '4'
+					},
+					{
+						industry: '测试卡',
+						value: '5'
+					}
+				],
+				// 行业卡的值
+				valueIndustryCard: '',
+
 				// 公司名称
 				valueCompanyName: '',
-				// 测试卡列表
-				testData: [],
+
+				// 异常卡列表
+				abnormalData: [],
 				// 分页需要的数据
 				totalCount: 0,
 				pageSize: 20,
@@ -173,30 +203,36 @@
 			};
 		},
 		mounted() {
-			this.getTestCardList()
+			this.getAbnormalCardList()
 		},
 		methods: {
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;
-				this.getTestCardList()
+				this.getAbnormalCardList()
 			},
 			// 改变每页显示的条数
 			changeSize(val) {
 				this.pageSize = val;
-				this.getTestCardList()
+				this.getAbnormalCardList()
 			},
-			// 获取测试卡列表
-			getTestCardList(){
+			// 获取异常卡列表
+			getAbnormalCardList(){
 				this.$axios({
 					url: '/api/manager/card/list',
 					method: 'post',
 					params: {
 						pageSize: this.pageSize,
 						pageNo: this.pageNo,
+						// 卡号或者iccid
 						cardNo: this.valueCardNum,
+						// 运营商
 						netWork: this.valueOperator,
-						cardType: this.valueCardKind,
+						// 归属地
+						netWorkArea: this.valueArea,
+						// 行业卡
+						businessNo: this.valueIndustryCard,
+						// 商户名称
 						companyName: this.valueCompanyName,
 						netResult: '1'
 					}
@@ -204,9 +240,9 @@
 					let data = res.data.data
 					this.totalCount = res.data.totalCount
 //					console.log(data)
-					this.testData = []
+					this.abnormalData = []
 					for (let i = 0; i < data.length; i++) {
-						this.testData.push({
+						this.abnormalData.push({
 							serialNum: data[i].no,
 							cardNum: data[i].cardNumber,
 							iccid: data[i].iccid,
@@ -224,8 +260,8 @@
 			// 筛选
 			selectTableList(){
 				this.pageNo = 1
-				this.testData = []
-				this.getTestCardList()
+				this.abnormalData = []
+				this.getAbnormalCardList()
 			},
 			goDetail(data){
 				let id = data.id

@@ -123,6 +123,8 @@ export function returnIndustryCard(i){
 		return 'NB'
 	}else if(i == 4){
 		return '预付充值卡'
+	}else if(i == 5){
+		return '测试卡'
 	}else {
 		return ''
 	}

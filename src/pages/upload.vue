@@ -13,6 +13,25 @@
 				<div class="tips">
 					注意：1、NB卡暂时不上传，2、测试卡和预付充值卡在行业卡中选择，不要单独新建一个sheet页，3、每隔10分钟左右上传一次
 				</div>
+
+				<!-- input组 -->
+				<!--<div class="input-group">-->
+					<!--&lt;!&ndash; 公司名称 &ndash;&gt;-->
+					<!--<el-input-->
+							<!--clearable-->
+							<!--class="company-name"-->
+							<!--placeholder="请输入公司名称"-->
+							<!--v-model="companyName">-->
+					<!--</el-input>-->
+					<!--&lt;!&ndash; 卡号 &ndash;&gt;-->
+					<!--<el-input-->
+							<!--clearable-->
+							<!--class="card-number"-->
+							<!--placeholder="请输入卡号"-->
+							<!--v-model="cardNum">-->
+					<!--</el-input>-->
+					<!--<el-button>提交</el-button>-->
+				<!--</div>-->
 			</div>
 		</div>
 	</div>
@@ -23,7 +42,10 @@
 		data() {
 			return {
 				fullscreenLoading: false,
-				uploadInfo: ''
+				uploadInfo: '',
+
+				companyName: '',
+				cardNum: ''
 			};
 		},
 		methods: {
@@ -98,6 +120,16 @@
 				.tips {
 					color: red;
 					font-size: 20px;
+				}
+				/* input组 */
+				.input-group {
+					display: flex;
+					.el-input {
+						width: 300px;
+					}
+					.card-number {
+						margin: 0 40px;
+					}
 				}
 			}
 		}
