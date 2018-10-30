@@ -297,6 +297,7 @@
 					method: 'post'
 				}).then(res => {
 					let data = res.data.data
+					console.log(data)
 					let result = []
 					for(let i=0; i<data.length; i++){
 						if(data[i].dicttype === 'sys'){

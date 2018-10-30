@@ -116,6 +116,7 @@
 									:data="customerManage.listData"
 									border
 									@select="selectRows"
+									@select-all="selectAll"
 									style="width: 100%">
 								<el-table-column type="selection" width="55" align="center"></el-table-column>
 								<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
@@ -901,6 +902,10 @@
 			},
 			// 选中某几行
 			selectRows(selection, row) {
+				this.customerManage.selectArr = selection
+			},
+			// 全选
+			selectAll(selection){
 				this.customerManage.selectArr = selection
 			},
 			// 启用或者禁用

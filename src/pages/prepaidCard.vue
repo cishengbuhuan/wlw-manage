@@ -10,44 +10,44 @@
 						<el-input
 								clearable
 								class="search"
-								placeholder="请输入卡号"
+								placeholder="请输入卡号或iccid"
 								prefix-icon="el-icon-search"
 								@change="selectTableData"
 								v-model="valueCard">
 						</el-input>
 						<!-- 运营商 -->
-						<el-select
-								class="select"
-								clearable
-								@change="selectTableData"
-								v-model="valueOperator"
-								placeholder="请选择运营商">
-							<el-option
-									v-for="item in operatorOptions"
-									:key="item.value"
-									:label="item.operator"
-									:value="item.value">
-							</el-option>
-						</el-select>
+						<!--<el-select-->
+								<!--class="select"-->
+								<!--clearable-->
+								<!--@change="selectTableData"-->
+								<!--v-model="valueOperator"-->
+								<!--placeholder="请选择运营商">-->
+							<!--<el-option-->
+									<!--v-for="item in operatorOptions"-->
+									<!--:key="item.value"-->
+									<!--:label="item.operator"-->
+									<!--:value="item.value">-->
+							<!--</el-option>-->
+						<!--</el-select>-->
 						<!-- 卡种类 -->
-						<el-select
-								class="select"
-								clearable
-								@change="selectTableData"
-								v-model="valueCardKind"
-								placeholder="请选择卡种类">
-							<el-option
-									v-for="item in kindOptions"
-									:key="item.value"
-									:label="item.kind"
-									:value="item.value">
-							</el-option>
-						</el-select>
+						<!--<el-select-->
+								<!--class="select"-->
+								<!--clearable-->
+								<!--@change="selectTableData"-->
+								<!--v-model="valueCardKind"-->
+								<!--placeholder="请选择卡种类">-->
+							<!--<el-option-->
+									<!--v-for="item in kindOptions"-->
+									<!--:key="item.value"-->
+									<!--:label="item.kind"-->
+									<!--:value="item.value">-->
+							<!--</el-option>-->
+						<!--</el-select>-->
 						<!-- 搜索公司名称 -->
 						<el-input
 								clearable
 								class="search"
-								placeholder="公司名称"
+								placeholder="商户名称"
 								prefix-icon="el-icon-search"
 								@change="selectTableData"
 								v-model="valueCompanyName">
@@ -63,20 +63,13 @@
 							style="width: 100%">
 						<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
-						<el-table-column prop="companyName" label="开户公司" align="center"></el-table-column>
-						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
+						<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
 						<el-table-column prop="area" label="归属地" align="center"></el-table-column>
-						<el-table-column prop="flowPackages" width="130" label="流量池套餐(M)(归入地)"
-						                 align="center"></el-table-column>
-						<el-table-column prop="actualFlow" width="130" label="实际开卡流量(M)(客户订购流量)"
+						<el-table-column prop="cardType" label="卡片类型" align="center"></el-table-column>
+						<el-table-column prop="customerName" label="商户名称" align="center"></el-table-column>
+						<el-table-column prop="actualFlow" width="160" label="实际开卡流量套餐(M)(客户订购流量)"
 						                 align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
-						<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
-						<el-table-column prop="silenceDuration" label="沉默期时长" align="center"></el-table-column>
-						<el-table-column prop="packages" label="套餐" align="center"></el-table-column>
-						<el-table-column prop="discount" label="折扣" align="center"></el-table-column>
-						<el-table-column prop="way" label="付款方式" align="center"></el-table-column>
-						<!--<el-table-column prop="result" label="响应结果" align="center"></el-table-column>-->
 						<el-table-column label="操作" align="center">
 							<template slot-scope="scope">
 								<div class="more" @click="goDetail(scope.row)">查看详情</div>
@@ -209,18 +202,14 @@
 						this.prepaidData.push({
 							serialNum: data[i].no,
 							cardNum: data[i].cardNumber,
-							companyName: data[i].companyName,
-							operator: returnOperator(data[i].netWork),
+							iccid: data[i].iccid,
 							area: data[i].area,
-							flowPackages: data[i].userPoolSize,
+							cardType: returnCardKind(data[i].cardType),
+							customerName: data[i].companyName,
 							actualFlow: data[i].poolSize,
 							entryTime: timestampToTime(data[i].serveTime),
-							cardKind: returnCardKind(data[i].cardType),
-							silenceDuration: data[i].silentPeriod,
-							packages: returnPackages(data[i].packageType),
-							discount: data[i].discount,
-							way: returnPayWay(data[i].payment),
-							result: data[i].netResult,
+
+
 							deviceId: data[i].deviceId,
 							companyId: data[i].companyId,
 							netWork: data[i].netWork,

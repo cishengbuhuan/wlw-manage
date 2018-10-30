@@ -79,6 +79,7 @@
 						<el-table-column prop="customerName" label="商户名称" align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
 						<el-table-column prop="error" label="错误说明" align="center"></el-table-column>
+						<el-table-column prop="remark" label="备注" align="center"></el-table-column>
 						<!--<el-table-column label="操作" align="center">-->
 							<!--<template slot-scope="scope">-->
 								<!--<div class="more" @click="open(scope.row)">根据</div>-->
@@ -251,7 +252,8 @@
 							industryCard: returnIndustryCard(data[i].businessCard),
 							customerName: data[i].companyName,
 							entryTime: timestampToTime(data[i].serveTime),
-							error: data[i].netResult
+							error: data[i].netResult,
+							remark: data[i].ownCompanyId === null ? `该地区(${data[i].area})未接入` : '',
 						})
 					}
 				})

@@ -54,18 +54,17 @@
 							border
 							style="width: 100%">
 						<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
-						<el-table-column prop="contactName" label="联系人姓名" align="center"></el-table-column>
-						<el-table-column prop="companyName" label="公司名称" align="center"></el-table-column>
-						<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
+						<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
+						<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
 						<el-table-column prop="area" label="归属地" align="center"></el-table-column>
+						<el-table-column prop="flowPackages" width="130" label="流量池套餐(M)(归入池)"
+						                 align="center"></el-table-column>
 						<el-table-column prop="actualFlow" width="130" label="实际开卡流量(M)(客户订购流量)"
 						                 align="center"></el-table-column>
+						<el-table-column prop="usageFlow" label="已使用流量" align="center"></el-table-column>
+						<el-table-column prop="rate" label="商户流量池占比" align="center"></el-table-column>
+						<el-table-column prop="customerName" label="商户名称" align="center"></el-table-column>
 						<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
-						<!--<el-table-column label="操作" align="center">-->
-							<!--<template slot-scope="scope">-->
-								<!--<div class="more" @click="goDetail(scope.row)">查看详情</div>-->
-							<!--</template>-->
-						<!--</el-table-column>-->
 					</el-table>
 					<el-pagination
 							v-if="totalCount > pageSize"

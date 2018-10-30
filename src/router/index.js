@@ -12,6 +12,7 @@ import testCardDetail from '../pages/testCardDetail.vue'
 import cardDetail from '../pages/cardDetail.vue'
 import prepaidCard from '../pages/prepaidCard.vue'
 import flowPool from '../pages/flowPool.vue'
+import flowRate from '../pages/flowRate.vue'
 import flowPoolDetail from '../pages/flowPoolDetail.vue'
 import rechargeDetails from '../pages/rechargeDetails.vue'
 import deductionDetails from '../pages/deductionDetails.vue'
@@ -19,8 +20,15 @@ import invoiceManagement from '../pages/invoiceManagement.vue'
 import businessBalanceDetail from '../pages/businessBalanceDetail.vue'
 import dictionary from '../pages/dictionary.vue'
 import system from '../pages/system.vue'
+import userManage from '../pages/userManage.vue'
+import userInfoDetail from '../pages/userInfoDetail.vue'
+import roleManage from '../pages/roleManage.vue'
+import roleDetail from '../pages/roleDetail.vue'
+import roleConfig from '../pages/roleConfig.vue'
+
 import upload from '../pages/upload.vue'
 import abnormalCard from '../pages/abnormalCard.vue'
+import flowCard from '../pages/flowCard.vue'
 
 import testPages from '../pages/testPages.vue'
 
@@ -89,6 +97,11 @@ const router = new Router({
 			component: flowPool
 		},
 		{
+			path: '/flowRate',
+			name: 'flowRate',
+			component: flowRate
+		},
+		{
 			path: '/flowPoolDetail',
 			name: 'flowPoolDetail',
 			component: flowPoolDetail
@@ -137,6 +150,36 @@ const router = new Router({
 			path: '/abnormalCard',
 			name: 'abnormalCard',
 			component: abnormalCard
+		},
+		{
+			path: '/flowCard',
+			name: 'flowCard',
+			component: flowCard
+		},
+		{
+			path: '/userManage',
+			name: 'userManage',
+			component: userManage
+		},
+		{
+			path: '/userInfoDetail',
+			name: 'userInfoDetail',
+			component: userInfoDetail
+		},
+		{
+			path: '/roleManage',
+			name: 'roleManage',
+			component: roleManage
+		},
+		{
+			path: '/roleDetail',
+			name: 'roleDetail',
+			component: roleDetail
+		},
+		{
+			path: '/roleConfig',
+			name: 'roleConfig',
+			component: roleConfig
 		}
 	]
 })

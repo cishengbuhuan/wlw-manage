@@ -1,96 +1,81 @@
 <template>
-	<div class="netWorkCard-wrap">
+	<div class="flowCard-wrap">
 		<div class="content">
 			<!-- 网卡列表 -->
 			<div class="netWork-list">
-				<!-- tab栏 -->
-				<div class="tab-nav">
-					<!-- 运营商分类 -->
-					<div class="operator">
-						<div class="tips">运营商分类:</div>
-						<div class="item-group">
-							<div v-for="(item,index) in operatorData"
-							     :class="[{ current: item.isSelected },'item']"
-							     @click="toggleOperator(index)"
-							     :key="index">
-								{{ item.operator }}
-							</div>
-						</div>
-					</div>
-					<!-- 流量分类 -->
-					<div class="flow">
-						<div class="tips">流量分类:</div>
-						<div class="item-group">
-							<div v-for="(item,index) in flowPoolData"
-							     :class="[{ current: item.isSelected },'item']"
-							     @click="toggleFlow(index)"
-							     :key="index">
-								{{ item.packages }}
-							</div>
-						</div>
-					</div>
-				</div>
+				<!-- title -->
+				<div class="list-header"><i></i><span>流量卡管理</span></div>
 				<!-- table栏 -->
 				<div class="list-table">
 					<!-- 工具栏 -->
 					<div class="tools">
-						<!-- 左侧的按钮组 -->
-						<div class="btn-group">
-							<div class="new-add" @click="btnAdd">新增单卡</div>
-							<!--<el-upload-->
-									<!--action="123"-->
-									<!--ref="upload"-->
-									<!--:http-request="uploadSectionFile"-->
-									<!--:file-list="fileList">-->
-								<!--<div class="batch-import">批量导入</div>-->
-							<!--</el-upload>-->
-							<a class="export-all" :href="downloadHref" download="导出文件.xls">全部导出</a>
-						</div>
-						<!-- 右侧的搜索组 -->
+						<!-- 上面的搜索组 -->
 						<div class="search-group">
-							<!-- 搜索卡号 -->
+							<!-- 搜索卡号或iccid -->
 							<el-input
 									clearable
 									class="search-number"
-									placeholder="请输入卡号"
+									placeholder="请输入卡号或iccid"
 									@change="searchData"
 									v-model="cardNum">
 							</el-input>
-							<!-- 搜索开户公司 -->
-							<!--<el-input-->
-									<!--clearable-->
-									<!--placeholder="请输入开户公司"-->
-									<!--v-model="company">-->
-							<!--</el-input>-->
+							<!-- 搜索商户名称 -->
+							<el-input
+									clearable
+									placeholder="请输入商户名称"
+									v-model="company">
+							</el-input>
+							<!-- 筛选卡片类型 -->
+							<el-select
+									clearable
+									@change="searchData"
+									v-model="valueCardType"
+									placeholder="请选择卡片类型">
+								<el-option
+										v-for="item in cardTypeOptions"
+										:key="item.value"
+										:label="item.cardType"
+										:value="item.value">
+								</el-option>
+							</el-select>
+						</div>
+						<!-- 下面的按钮组 -->
+						<div class="btn-group">
+							<div class="new-add" @click="btnAdd">新增单卡</div>
+							<el-upload
+								action="123"
+								ref="upload"
+								:http-request="uploadSectionFile"
+								:file-list="fileList">
+								<div class="batch-import">导入卡信息</div>
+							</el-upload>
+							<a class="export-all" :href="downloadHref" download="导出文件.xls">导出信息</a>
+							<div class="delete" @click="btnDelete">删除</div>
 						</div>
 					</div>
 					<!-- 表格 -->
 					<div class="table">
 						<el-table
-								:data="netWorkData"
+								:data="flowCardData"
+								@select="selectRows"
+								@select-all="selectAll"
+								@sort-change="sortTime"
 								border
 								style="width: 100%">
+							<el-table-column type="selection" width="55" align="center"></el-table-column>
 							<el-table-column prop="serialNum" label="序号" align="center"></el-table-column>
 							<el-table-column prop="cardNum" label="卡号" align="center"></el-table-column>
-							<el-table-column prop="companyName" label="开户公司" align="center"></el-table-column>
-							<el-table-column prop="operator" label="运营商" align="center"></el-table-column>
+							<el-table-column prop="iccid" label="ICCID" align="center"></el-table-column>
 							<el-table-column prop="area" label="归属地" align="center"></el-table-column>
-							<el-table-column prop="flowPackages" width="130" label="流量池套餐(M)(归入地)"
+							<el-table-column prop="cardType" label="卡片类型" align="center"></el-table-column>
+							<el-table-column prop="customerName" label="商户名称" align="center"></el-table-column>
+							<el-table-column prop="actualFlow" width="160" label="实际开卡流量套餐(M)(客户订购流量)"
 							                 align="center"></el-table-column>
-							<el-table-column prop="actualFlow" width="130" label="实际开卡流量(M)(客户订购流量)"
-							                 align="center"></el-table-column>
-							<el-table-column prop="entryTime" label="录入时间" align="center"></el-table-column>
-							<el-table-column prop="cardKind" label="卡种类" align="center"></el-table-column>
-							<el-table-column prop="silenceDuration" label="沉默期时长" align="center"></el-table-column>
-							<el-table-column prop="packages" label="套餐" align="center"></el-table-column>
-							<el-table-column prop="discount" label="折扣" align="center"></el-table-column>
-							<el-table-column prop="way" label="付款方式" align="center"></el-table-column>
-							<!--<el-table-column prop="result" label="响应结果" align="center"></el-table-column>-->
+							<el-table-column prop="entryTime" label="录入时间" sortable='custom' align="center"></el-table-column>
 							<el-table-column label="操作" align="center">
 								<template slot-scope="scope">
-									<div class="more" @click="goDetail(scope.row)">查看详情</div>
 									<div class="edit" @click="editDiscount(scope.row)">修改折扣</div>
-									<div class="delete" @click="delete(scope.row)">删除</div>
+									<div class="more" @click="goDetail(scope.row)">查看详情</div>
 								</template>
 							</el-table-column>
 						</el-table>
@@ -226,16 +211,16 @@
 									</el-option>
 								</el-select>
 							</div>
-							<!-- 套餐 -->
+							<!-- 卡片类型 -->
 							<div class="card-kind form-item">
 								<div class="label">
-									<span>套餐<i>*</i> :</span>
+									<span>卡片类型<i>*</i> :</span>
 								</div>
-								<el-select clearable v-model="singleCardForm.packagesValue" placeholder="请选择套餐">
+								<el-select clearable v-model="singleCardForm.cardTypeValue" placeholder="请选择卡片类型">
 									<el-option
-											v-for="item in singleCardForm.packagesOptions"
+											v-for="item in singleCardForm.cardTypeOptions"
 											:key="item.value"
-											:label="item.packages"
+											:label="item.cardType"
 											:value="item.value">
 									</el-option>
 								</el-select>
@@ -254,6 +239,20 @@
 										v-model="singleCardForm.intoPool">
 								</el-input>
 							</div>
+							<!-- 套餐 -->
+							<div class="form-item">
+								<div class="label">
+									<span>套餐<i>*</i> :</span>
+								</div>
+								<el-select clearable v-model="singleCardForm.packagesValue" placeholder="请选择套餐">
+									<el-option
+											v-for="item in singleCardForm.packagesOptions"
+											:key="item.value"
+											:label="item.packages"
+											:value="item.value">
+									</el-option>
+								</el-select>
+							</div>
 							<!-- 客户订购流量 -->
 							<div class="form-item">
 								<div class="label">
@@ -265,20 +264,6 @@
 										placeholder="请输入客户订购流量"
 										v-model="singleCardForm.orderFlow">
 								</el-input>
-							</div>
-							<!-- 付费方式 -->
-							<div class="form-item">
-								<div class="label">
-									<span>付费方式<i>*</i> :</span>
-								</div>
-								<el-select clearable v-model="singleCardForm.payWayValue" placeholder="请选择付费方式">
-									<el-option
-											v-for="item in singleCardForm.payWayOptions"
-											:key="item.value"
-											:label="item.payWay"
-											:value="item.value">
-									</el-option>
-								</el-select>
 							</div>
 						</div>
 						<div class="form-row">
@@ -444,6 +429,21 @@
 										v-model="singleCardForm.discount">
 								</el-input>
 							</div>
+							<!-- 付费方式 -->
+							<div class="form-item">
+								<div class="label">
+									<span>付费方式<i>*</i> :</span>
+								</div>
+								<el-select clearable v-model="singleCardForm.payWayValue" placeholder="请选择付费方式">
+									<el-option
+											v-for="item in singleCardForm.payWayOptions"
+											:key="item.value"
+											:label="item.payWay"
+											:value="item.value">
+									</el-option>
+								</el-select>
+							</div>
+							<div class="form-item"></div>
 						</div>
 						<div class="btn-save" @click="saveForm">保存信息</div>
 					</div>
@@ -465,32 +465,51 @@
 				cardNum: '',
 				// 开户公司
 				company: '',
-
-				// 运营商
-				operatorData: [
+				// 卡片类型
+				valueCardType: '',
+				cardTypeOptions: [
 					{
-						operator: '中国移动',
-						isSelected: true,
-						value: 1
+						cardType: '正常卡',
+						value: '1'
 					},
 					{
-						operator: '中国电信',
-						isSelected: false,
-						value: 2
+						cardType: '测试卡',
+						value: '2'
 					},
 					{
-						operator: '中国联通',
-						isSelected: false,
-						value: 3
+						cardType: '预付卡',
+						value: '3'
 					}
 				],
-				netWork: '',
-				defaultNetWork: '1',
+
 				// 流量池
 				flowPoolData: [],
 
 				// 网卡列表
-				netWorkData: [],
+				flowCardData: [
+					{
+						serialNum: 1,
+						cardNum: '12345',
+						iccid: '1234567890',
+						area: '北京',
+						cardType: '正常卡',
+						customerName: '上海量之阵',
+						actualFlow: '10M',
+						entryTime: '2018-09-09',
+						discount: '0.2'
+					},
+					{
+						serialNum: 2,
+						cardNum: '12345',
+						iccid: '1234567890',
+						area: '北京',
+						cardType: '正常卡',
+						customerName: '上海量之阵',
+						actualFlow: '10M',
+						entryTime: '2018-09-09',
+						discount: '0.2'
+					}
+				],
 				// 分页需要的数据
 				totalCount: 0,
 				pageSize: 20,
@@ -582,6 +601,22 @@
 							value: '4'
 						}
 					],
+					// 卡片类型
+					cardTypeValue: '',
+					cardTypeOptions: [
+						{
+							cardType: '正常卡',
+							value: '1'
+						},
+						{
+							cardType: '测试卡',
+							value: '2'
+						},
+						{
+							cardType: '预付卡',
+							value: '3'
+						}
+					],
 					// 付费方式
 					payWayValue: '',
 					payWayOptions: [
@@ -671,13 +706,11 @@
 				},
 				fileList: [],
 				companyId: '',
-				poolId: '',
-				defaultPoolId: ''
+				// 当前选中的数组
+				currentArr: []
 			};
 		},
 		mounted() {
-			this.getCompanyId()
-			this.getPoolPackages()
 		},
 		computed: {
 			downloadHref(){
@@ -691,10 +724,6 @@
 			}
 		},
 		methods: {
-			// 接收传递过来的companyId
-			getCompanyId(){
-				this.companyId = this.$route.query.companyId
-			},
 			// 改变当前页数
 			changePageNo(val) {
 				this.pageNo = val;
@@ -702,26 +731,6 @@
 			// 改变每页显示的条数
 			changeSize(val) {
 				this.pageSize = val;
-			},
-			// 切换运营商的分类
-			toggleOperator(index) {
-				for (let i = 0; i < this.operatorData.length; i++) {
-					this.operatorData[i].isSelected = false;
-				}
-				this.operatorData[index].isSelected = true
-				this.netWork = this.operatorData[index].value
-
-				this.getNetWorkData()
-				this.getPoolPackages()
-			},
-			// 切换流量池套餐的分类
-			toggleFlow(index) {
-				for (let i = 0; i < this.flowPoolData.length; i++) {
-					this.flowPoolData[i].isSelected = false;
-				}
-				this.flowPoolData[index].isSelected = true
-				this.poolId = this.flowPoolData[index].poolId
-				this.getNetWorkData()
 			},
 			// 点击新增单卡按钮
 			btnAdd() {
@@ -784,6 +793,45 @@
 			closeNewADD() {
 				this.singleCard = !this.singleCard
 			},
+			// 选中某几行
+			selectRows(selection, row) {
+				this.currentArr = selection
+			},
+			// 全选
+			selectAll(selection){
+				this.currentArr = selection
+			},
+			// 点击删除按钮
+			btnDelete(i){
+				if (this.currentArr.length == 0) {
+					this.$message('请至少先选中一行数据！');
+				} else {
+					let phoneStr = ''
+					console.log(this.currentArr)
+					for (let i = 0; i < this.currentArr.length; i++) {
+						phoneStr += ',' + this.currentArr[i].area
+					}
+					let resStr = phoneStr.slice(1, phoneStr.length)
+					console.log(resStr)
+
+//					this.$axios({
+//						url: '/api/manager/customer/modifyStatus',
+//						method: 'post',
+//						params: {
+//							mobiles: resStr,
+//							enable: i
+//						}
+//					}).then(res => {
+//						if (res.data.code == 1) {
+//							this.$message.success('删除成功！');
+//						}else {
+//							this.$message.success(res.data.msg);
+//						}
+//						this.customerData = []
+//						this.getUserList()
+//					})
+				}
+			},
 
 
 			// 点击修改折扣按钮
@@ -827,31 +875,6 @@
 				this.modify.modifyDiscount = false
 			},
 
-			// 获取流量池套餐
-			getPoolPackages(){
-				this.$axios({
-					url: '/api/manager/customer/companyPool',
-					method: 'post',
-					params: {
-						companyId: this.companyId,
-						netWork: this.netWork ? this.netWork : this.defaultNetWork,
-					}
-				}).then(res => {
-					let data = res.data.data
-					this.flowPoolData = []
-					for (let i = 0; i < data.length; i++) {
-						this.flowPoolData.push({
-							packages: data[i].name,
-							poolId: data[i].poolId,
-							isSelected: false
-						})
-					}
-					this.flowPoolData[0].isSelected = true
-					this.defaultPoolId = this.flowPoolData[0].poolId
-
-					this.getNetWorkData()
-				})
-			},
 			// 获取网卡表格数据
 			getNetWorkData(){
 				this.$axios({
@@ -868,9 +891,9 @@
 				}).then(res => {
 					let data = res.data.data
 					this.totalCount = res.data.totalCount
-					this.netWorkData = []
+					this.flowCardData = []
 					for (let i = 0; i < data.length; i++) {
-						this.netWorkData.push({
+						this.flowCardData.push({
 							serialNum: data[i].no,
 							cardNum: data[i].cardNumber,
 							companyName: data[i].companyName,
@@ -907,10 +930,6 @@
 				this.netWorkData = []
 				this.getNetWorkData()
 			},
-			// 删除
-			delete(data){
-
-			},
 
 			// 批量导入的自定义上传
 			uploadSectionFile(params) {
@@ -930,6 +949,11 @@
 					}
 				};
 				xhr.send(formData);
+			},
+			// 录入时间排序
+			sortTime(column, prop, order) {
+				this.pageNo = 1
+				this.getNetWorkData()
 			}
 		}
 	};
@@ -937,7 +961,7 @@
 
 <style lang="stylus" scoped>
 	mainBlue = #4cb2ff;
-	.netWorkCard-wrap {
+	.flowCard-wrap {
 		padding-top: 50px;
 		padding-left: 200px;
 		.content {
@@ -950,53 +974,37 @@
 				padding: 30px 30px 40px 30px;
 				box-shadow: 0 0 5px rgba(187, 187, 187, 0.8);
 				border-radius: 5px;
-				/* tab栏 */
-				.tab-nav {
-					/* 运营商分类, 流量池分类 */
-					.operator, .flow {
-						display: flex;
-						border-bottom: 1px solid #bbbbbb;
-						height: 60px;
-						line-height: 60px;
-						.tips {
-							font-size: 16px;
-							color: #bbb;
-						}
-						.item-group {
-							display: flex;
-							.item {
-								margin-left: 50px;
-								cursor: pointer;
-							}
-							.current {
-								color: mainBlue;
-								/*text-decoration: underline;*/
-								position: relative;
-							}
-							.current:after {
-								display: block;
-								content: '';
-								width: 100%;
-								height: 3px;
-								background-color: mainBlue;
-								position: absolute;
-								left: 0;
-								bottom: 5px;
-							}
-						}
+				/* list-header */
+				.list-header {
+					font-size: 24px;
+					font-weight: 500;
+					display: flex;
+					i {
+						width: 6px;
+						height: 28px;
+						background-color: mainBlue;
+						margin-right: 10px;
+						margin-top: 2px;
 					}
 				}
 				/* table栏 */
 				.list-table {
 					/* 工具栏 */
 					.tools {
-						display: flex;
-						justify-content: center;
 						margin: 35px 0 40px;
-						/* 左侧的按钮组 */
+						/* 上面的搜索组 */
+						.search-group {
+							display: flex;
+							.el-input {
+								width: 300px;
+								margin-right: 20px;
+							}
+						}
+						/* 下面的按钮组 */
 						.btn-group {
 							display: flex;
-							.new-add, .modify-discount, .batch-import, .export-all {
+							margin-top: 20px;
+							.new-add, .modify-discount, .batch-import, .export-all, .delete {
 								width: 100px;
 								height: 34px;
 								line-height: 34px;
@@ -1010,18 +1018,11 @@
 								margin-top: 3px;
 							}
 						}
-						/* 右侧的搜索组 */
-						.search-group {
-							display: flex;
-							.search-number {
-								margin-right: 20px;
-							}
-						}
 					}
 					/* table */
 					.table {
 						.cell {
-							.more, .edit, .delete {
+							.more, .edit {
 								cursor: pointer;
 								color: mainBlue;
 							}

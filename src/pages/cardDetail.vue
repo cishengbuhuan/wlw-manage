@@ -44,7 +44,7 @@
 						</div>
 						<!-- 客户订购流量 -->
 						<div class="item">
-							客户订购流量: {{ buyFlow }}
+							客户订购流量套餐: {{ buyFlow }} / {{ packages }}
 						</div>
 						<!-- 沉默期时长 -->
 						<div class="item">
@@ -84,9 +84,9 @@
 						<div class="item">
 							是否定向卡: {{ orientationCard }}
 						</div>
-						<!-- 套餐 -->
+						<!-- 卡片类型 -->
 						<div class="item">
-							套餐: {{ packages }}
+							卡片类型: {{ cardType }}
 						</div>
 						<!-- 折扣 -->
 						<div class="item">
@@ -102,7 +102,9 @@
 						<div class="item">
 							定向IP: {{ directedIP }}
 						</div>
-						<div class="item"></div>
+						<div class="item">
+							已使用流量: {{ usageFlow }}
+						</div>
 					</div>
 					<div class="item-group">
 						<!-- 网络响应结果 -->
@@ -138,11 +140,13 @@
 				entryTime: '',
 				billingTime: '',
 				message: '0',
-				orientationCard: '是',
+				orientationCard: '',
+				cardType: '',
 				packages: '',
 				discount: '',
 				payWay: '',
 				directedIP: '',
+				usageFlow: '',
 				// 网络响应结果
 				netResult: ''
 			};
@@ -185,6 +189,10 @@
 					this.directedIP = data.cardDirectIp
 					// 网络响应结果
 					this.netResult = data.netResult
+					// 卡片类型
+					this.cardType = data.cardType
+					// 已使用流量
+					this.usageFlow = data.usageFlow
 				})
 			}
 

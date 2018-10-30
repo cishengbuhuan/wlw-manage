@@ -74,58 +74,70 @@
 						index: '3',
 						menuTwo: [
 							{
-								titleTwo: '测试卡',
-								path: '/testCard',
+								titleTwo: '流量卡管理',
+								path: '/flowCard',
 								index: '3-1',
+								isShow: true
+							},
+							{
+								titleTwo: '测试卡管理',
+								path: '/testCard',
+								index: '3-2',
 								isShow: true
 							},
 							{
 								titleTwo: '预付充值卡',
 								path: '/prepaidCard',
-								index: '3-2',
+								index: '3-3',
 								isShow: true
 							},
 							{
 								titleTwo: '卡片导入',
 								path: '/upload',
-								index: '3-3',
+								index: '3-4',
 								isShow: false
 							},
 							{
 								titleTwo: '异常卡',
 								path: '/abnormalCard',
-								index: '3-4',
+								index: '3-5',
+								isShow: true
+							},
+						]
+					},
+					{
+						title: '流量池管理',
+						index: '4',
+						menuTwo: [
+							{
+								titleTwo: '流量占比',
+								path: '/flowRate',
+								index: '4-1',
+								isShow: true
+							},
+							{
+								titleTwo: '中国移动',
+								path: '/flowPool/1',
+								index: '4-2',
+								type: 1,
+								isShow: true
+							},
+							{
+								titleTwo: '中国联通',
+								path: '/flowPool/2',
+								index: '4-3',
+								type: 2,
+								isShow: true
+							},
+							{
+								titleTwo: '中国电信',
+								path: '/flowPool/3',
+								index: '4-4',
+								type: 3,
 								isShow: true
 							}
 						]
 					},
-//					{
-//						title: '流量池管理',
-//						index: '4',
-//						menuTwo: [
-//							{
-//								titleTwo: '中国移动',
-//								path: '/flowPool/1',
-//								index: '4-1',
-//								type: 1,
-//								isShow: true
-//							},
-//							{
-//								titleTwo: '中国联通',
-//								path: '/flowPool/2',
-//								index: '4-2',
-//								type: 2,
-//								isShow: true
-//							},
-//							{
-//								titleTwo: '中国电信',
-//								path: '/flowPool/3',
-//								index: '4-3',
-//								type: 3,
-//								isShow: true
-//							}
-//						]
-//					},
 //					{
 //						title: '财务管理',
 //						index: '5',
@@ -156,30 +168,36 @@
 //							}
 //						]
 //					},
-//					{
-//						title: '系统设置',
-//						index: '6',
-//						menuTwo: [
-//							{
-//								titleTwo: '字典管理',
-//								path: '/dictionary',
-//								index: '6-1',
-//								isShow: true
-//							},
-//							{
-//								titleTwo: '系统管理',
-//								path: '/system',
-//								index: '6-2',
-//								isShow: true
-//							},
-////							{
-////								titleTwo: '权限测试页面',
-////								path: '/testPages',
-////								index: '6-3',
-////								isShow: true
-////							}
-//						]
-//					}
+					{
+						title: '系统设置',
+						index: '6',
+						menuTwo: [
+							{
+								titleTwo: '字典管理',
+								path: '/dictionary',
+								index: '6-1',
+								isShow: true
+							},
+							{
+								titleTwo: '系统管理',
+								path: '/system',
+								index: '6-2',
+								isShow: true
+							},
+							{
+								titleTwo: '用户管理',
+								path: '/userManage',
+								index: '6-3',
+								isShow: true
+							},
+							{
+								titleTwo: '角色管理',
+								path: '/roleManage',
+								index: '6-4',
+								isShow: true
+							},
+						]
+					}
 				]
 			};
 		},
@@ -199,9 +217,9 @@
 				}).then(res => {
 					let loginName = res.data.data.loginname
 					if(loginName !== 'admin') {
-						this.menus[2].menuTwo[2].isShow = false
+						this.menus[2].menuTwo[3].isShow = false
 					}else {
-						this.menus[2].menuTwo[2].isShow = true
+						this.menus[2].menuTwo[3].isShow = true
 					}
 				})
 			},
